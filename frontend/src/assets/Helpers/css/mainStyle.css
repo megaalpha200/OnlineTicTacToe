@@ -1,0 +1,239 @@
+/* @font-face{
+    font-family: KITC;
+    src: url(~assets/Fonts/KITC.ttf);
+}
+
+@font-face{
+    font-family: Fortissimo;
+    src: url(~assets/Fonts/forte.ttf);
+}
+
+@font-face{
+    font-family: SCG;
+    src: url(~assets/Fonts/SCG.ttf);
+}
+
+@font-face{
+    font-family: CUR;
+    src: url(~assets/Fonts/cour.ttf);
+}
+
+@font-face{
+    font-family: TEMP;
+    src: url(~assets/Fonts/temp.ttf);
+} */
+
+html {
+    font-size: 16px;
+}
+
+body {
+    background-color: #000000;
+}
+
+article{
+    /*border: 2px dashed #cc0000;*/
+    padding: 0.5rem 0.5rem;
+    border-radius: 20px;
+    width: 100%;
+    display: block;
+    position: relative;
+}
+
+article section {
+    /* border: 1px dashed #CC0000; */
+    width: 100%;
+    /* padding-top: 0.3%;
+    padding-bottom: 0.3%; */
+    padding: 1.5%;
+    margin-top: 2%;
+    position: relative;
+}
+
+article section:nth-of-type(2n) {
+    background-color: #c4c4c4;
+    border-radius: 20px;
+}
+
+article section:nth-of-type(2n + 1) .text-container {
+    box-shadow: 7px 7px #7c8eb2;
+}
+
+article section:nth-of-type(2n + 1) .decorated-img {
+    box-shadow: 7px 7px #7c8eb2;
+}
+
+a, Link, .btn-link {
+    color: blue;
+    text-decoration: none;
+}
+
+a:hover, Link:hover, .btn-link:hover {
+    color: white;
+}
+
+article section:nth-of-type(2n) a:hover, Link:hover, .btn-link:hover {
+    color: black;
+}
+
+strong {
+    color: #FFFFFF;
+}
+
+#main-layout{
+    /*border: 2px dashed #cc0000;*/
+    margin-right: auto;
+    margin-left: auto;
+    width: 100%;
+    border-radius: 20px;
+    position: relative;
+}
+
+.text-container {
+    background-color: #000000;
+    box-shadow: 7px 7px #888888;
+    border-radius: 10%;
+    text-align: center;
+    font: 15px serif;
+    color: #FFFFFF;
+    max-width: 95%;
+    align-self: center;
+    margin: 0 auto;
+    padding: 0.5rem;
+}
+
+#main-header{
+    background-color: silver;
+    font: bold 30px sans-serif;
+    text-align: center;
+    color: #000000;
+    height: auto;
+    width: 100%;
+    border-radius: 30px;
+}
+
+/*#side-layout{
+    border: 2px dashed #cc0000;
+    width: 19%;
+    height: auto;
+    border-radius: 20px;
+    float: left;
+    position: relative;
+}*/
+
+#content-frame {
+    width: 100%;
+    position: relative;
+}
+
+.inner-info-box-link{
+    color: deepskyblue;
+    text-decoration: none;
+}
+
+.inner-info-box-link:hover{
+    color: #68A94A;
+}
+
+.animate-transition {
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+.info-header {
+    background-color: #000000;
+    font: 25px serif;
+    color: #FFFFFF;
+    border-top: 2px solid #000000;
+    border-left: 4px solid #000000;
+    border-bottom: 8px solid #000000;
+    border-radius: 10%;
+    left: 0;
+}
+
+.img-container {
+    width: 100%;
+    height: auto;
+    overflow: hidden;
+    margin: auto;
+    text-align: center;
+}
+
+.img-container img {
+    max-width: 50%;
+    display: inline-block;
+    height: auto;
+}
+
+@media only screen and (max-width: 960px) {
+    
+}
+
+@media only screen and (max-width: 800px) {
+    #side-layout {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 540px) {
+    .img-container img {
+        max-width: 100%;
+    }
+}
+
+/*@media only screen and (max-width: 540px) or (max-width: 360px) */
+@media screen
+and (device-width: 320px)
+and (device-height: 640px)
+and (-webkit-device-pixel-ratio: 2){
+    
+}
+
+
+/*.menu-item{
+	border-bottom: 1px solid #E68080;
+	border-radius: 5px;
+	font: 18px KITC, cursive;
+}
+.inner-menu-item{
+	border-left: 1px solid #E68080;
+	border-bottom: 1px solid #E68080;
+	border-radius: 5px;
+	font: 18px KITC, cursive;
+	margin-left: 0.5em;
+}
+.menu-links{
+	color: #FFFFFF;
+	text-decoration: none;
+}
+.menu-links:hover{
+	color: #FF0000;
+	font: bold 20px KITC, cursive;
+}*/
+
+/*
+.sec-main-inner{
+	!*border: 1px dashed #CC0000;*!
+}
+.back-buttons{
+	margin-left: 16px 1px;
+	padding: 14px 6px;
+	width: auto;
+	height: auto;
+	vertical-align: top;
+	white-space: normal;
+	background-color: #CC0000;
+	border-radius: 30px;
+	color: #FFD000;
+	cursor: pointer;
+	transition-property: background-color, border-color, box-shadow;
+	transition-duration: 150ms;
+	font: 15px KITC, cursive;
+	outline-width: 0;
+}
+.back-buttons:hover{
+	background-color: #FFD000;
+	color: #68A94A;
+} */

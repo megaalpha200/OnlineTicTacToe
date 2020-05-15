@@ -1,0 +1,64 @@
+version: '3.7'
+
+services:
+  website_frontend:
+    image: megaalpha200/temp-app:amd64
+    build: ./frontend
+    deploy:
+      restart_policy:
+        condition: any
+    restart: always
+    depends_on:
+    - website_backend
+    - mongo
+    # volumes:
+    # - ./frontend/certbot/conf:/etc/letsencrypt
+    # - ./frontend/certbot/www:/var/www/certbot
+    # command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+    ports:
+    - "80:80/tcp"
+    #- "443:443/tcp"
+    networks:
+    - webnet
+
+  # certbot:
+  #   image: certbot/certbot:arm64v8-latest
+  #   volumes:
+  #   - ./frontend/certbot/conf:/etc/letsencrypt
+  #   - ./frontend/certbot/www:/var/www/certbot
+  #   entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+
+  mongo:
+    image: mongo
+    deploy:
+      restart_policy:
+        condition: any
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+    - "27017:27017/tcp"
+    volumes:
+    - ./mongo:/data/db
+    networks:
+    - webnet
+
+  website_backend:
+    image: megaalpha200/temp-back:amd64
+    build: ./backend
+    deploy:
+      restart_policy:
+        condition: any
+    restart: always
+    depends_on:
+    - mongo
+    ports:
+    - "8524:8524/tcp"
+    networks:
+    - webnet
+
+networks:
+  webnet:
+
+    #

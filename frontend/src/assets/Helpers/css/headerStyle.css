@@ -1,0 +1,267 @@
+#header-container {
+    background-color: black;
+    /*border: 1px solid #CC0000;*/
+    /*border-radius: 40px;*/
+    width: 100%;
+    display: inline-block;
+    text-align: center;
+    left: 0;
+    right: 0;
+    z-index: 9998;
+    top: 0;
+    position: fixed;
+}
+
+#alt-nav {
+    text-align: left;
+}
+
+#header-img {
+    max-width: 40%;
+}
+
+#alt-header-img {
+    max-width: 35%;
+}
+
+#motto {
+    font: italic 2rem sans-serif;
+    color: #FFFFFF;
+    margin-top: -0.3rem;
+}
+
+#alt-motto {
+    font: italic 1.5rem sans-serif;
+    color: #FFFFFF;
+    margin-top: -0.4rem;
+}
+
+header, nav {
+    height: auto;
+    width: 100%;
+    margin-right: 1%;
+}
+
+#menu-full {
+    list-style-type: none;
+    text-align: center;
+    position: relative;
+    display: inline;
+    height: 100%;
+}
+
+.menu-item {
+    color: #FFFFFF;
+    font-family: sans-serif;
+    font-size: 1.3rem;
+    padding: 1rem 2rem 1rem 2rem;
+    border-radius: 10px;
+    max-width: 12rem;
+    display: inline-table;
+}
+
+.sub-menu {
+    position: relative; /*Prevents any sub menu items from overlapping (visually) with main menu items*/
+}
+
+.menu-item:hover {
+    background-color: #FFFFFF;
+}
+
+#page-title{
+    font-family: sans-serif;
+    display: none;
+    color: #FFFFFF;
+    font-size: 1.8rem;
+}
+
+.inner-menu {
+    display: none;
+    position: absolute;
+    background-color: #FFFFFF;
+    border-radius: 10px;
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+#menu-button {
+    float: right;
+    margin-right: 0.5rem;
+    /* border: 3px solid #D11919; */
+    border-radius: 50%;
+    padding: 0.31rem 0.31rem 0.31rem 0.31rem;
+    cursor: pointer;
+    display: none;
+}
+
+#menu-button div{
+    width: 30px;
+    height: 4px;
+    background-color: #FFFFFF;
+    margin: 4px 0;
+}
+
+#back-button{
+	margin-left: 16px 1px;
+	padding: 14px 6px;
+	width: auto;
+	height: auto;
+	vertical-align: top;
+	white-space: normal;
+	background-color: #000000;
+	border-radius: 15px;
+	color: #FFFFFF;
+	cursor: pointer;
+	transition-property: background-color, border-color, box-shadow;
+	transition-duration: 150ms;
+	font: 15px sans-serif;
+	outline-width: 0;
+}
+
+#back-button:hover{
+	background-color: #FFFFFF;
+	color: #68A94A;
+}
+
+.shrink-header {
+    font-size: 1rem;
+}
+
+.shrink-header #header-img {
+    max-width: 30%;
+}
+
+.shrink-header #motto {
+    font-size: 1rem;
+}
+
+.shrink-header .menu-item{
+    font-size: 1rem;
+}
+
+.shrink-header #page-title {
+    font-size: 1.5rem;
+}
+
+.shrink-header #menu-button div {
+    width: 25px;
+    height: 2px;
+}
+
+.disappear-header #header-img {
+    display: none;
+}
+
+.disappear-header  #motto {
+    display: none;
+}
+
+#head-sep{
+    background-color: transparent;
+    padding-top: 16rem;
+}
+
+#head-sep-alt{
+    background-color: transparent;
+    padding-top: 3rem;
+}
+
+@media only screen and (max-width: 960px) {
+    #motto{
+        font-size: 1.5rem;
+        margin-top: 0;
+    }
+
+    #alt-motto {
+        font-size: 1.0rem;
+    }
+
+    #menu-full{
+        display: none;
+    }
+
+    .shrink-header #header-img {
+        max-width: 20%;
+    }
+
+    .shrink-header #motto {
+        font-size: 0.8rem;
+    }
+
+    #page-title{
+        display: inline-table;
+    }
+
+    #menu-button {
+        display: inline-table;
+    }
+
+    #head-sep {
+        padding-top: 10rem;
+    }
+}
+
+@media only screen and (max-width: 800px) {
+
+    #menu-full{
+        display: none;
+    }
+
+    #page-title{
+        display: inline-table;
+    }
+
+    #menu-button {
+        display: inline-table;
+    }
+
+    .shrink-header #page-title {
+        font-size: 1.3rem;
+    }
+
+    #head-sep {
+        padding-top: 9rem;
+    }
+}
+
+@media screen and (max-width: 540px) {
+
+}
+
+/*@media only screen and (max-width: 540px) or (max-width: 360px) */
+@media screen
+and (device-width: 320px)
+and (device-height: 640px)
+and (-webkit-device-pixel-ratio: 2){
+    #menu-full{
+        display: none;
+    }
+
+    #page-title{
+        display: inline-table;
+    }
+
+    #menu-button {
+        display: inline-table;
+    }
+
+    #motto{
+        font-size: 1rem;
+    }
+
+    #page-title{
+        font-size: 1.5rem;
+    }
+
+    #menu-button {
+        padding: 0.15rem 0.15rem 0.15rem 0.15rem;
+    }
+
+    #menu-button div {
+        width: 25px;
+        height: 2px;
+    }
+
+    #head-sep {
+        padding-top: 6rem;
+    }
+}

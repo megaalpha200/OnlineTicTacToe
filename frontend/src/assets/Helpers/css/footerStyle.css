@@ -1,0 +1,55 @@
+/* footer {
+    margin-top: 4rem;
+    border: 1px dashed #CC0000;
+    width: 100%;
+    position: absolute;
+} */
+
+#footer-container {
+    /* background: #6d6c6c none; */
+    /* border: 1px dashed #CC0000; */
+    /* bottom: 0; */
+    margin-top: 4rem;
+    width: 100%;
+    position: relative;
+}
+
+.footer-item{
+    /*box-shadow: 7px 7px #7c8eb2;*/
+    height: auto;
+    max-width: 100%;
+    border-radius: 12px;
+    background-color: #1f1c1c;
+    padding-top: 1%;
+    padding-bottom: 1%;
+    position: relative;
+}
+
+.footer-inner-item{
+    position: relative;
+    color: gold;
+    font: 14px sans-serif;
+    text-align: center;
+}
+
+.log-item{
+    background-color: #000000;
+    color: #FFFFFF;
+    font-family: sans-serif;
+}
+
+#copyright{
+    text-align: center;
+    font-family: sans-serif;
+    color: white;
+    position: relative;
+}
+
+#stats {
+    text-align: center;
+    position: relative;
+}
+
+#last-update-date:after {
+    content: '4/5/2020';
+}
