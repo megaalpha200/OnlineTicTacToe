@@ -61,4 +61,10 @@ services:
 networks:
   webnet:
 
-    #
+    # db.createUser({
+    #   user: "username",
+    #   pwd: passwordPrompt(),
+    #   roles:[
+    #     { role: "readWrite", db: "database" }
+    #   ]
+    # })
