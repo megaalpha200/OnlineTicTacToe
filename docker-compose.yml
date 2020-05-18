@@ -12,8 +12,8 @@ services:
     - website_backend
     - mongo
     volumes:
-    - ./frontend/certbot/conf:/etc/letsencrypt
-    - ./frontend/certbot/www:/var/www/certbot
+    - ./certbot/conf:/etc/letsencrypt
+    - ./certbot/www:/var/www/certbot
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
     ports:
     - "80:80/tcp"
@@ -24,8 +24,8 @@ services:
   certbot:
     image: certbot/certbot
     volumes:
-    - ./frontend/certbot/conf:/etc/letsencrypt
-    - ./frontend/certbot/www:/var/www/certbot
+    - ./certbot/conf:/etc/letsencrypt
+    - ./certbot/www:/var/www/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
 
   mongo:
@@ -53,6 +53,9 @@ services:
     restart: always
     depends_on:
     - mongo
+    volumes:
+    - ./certbot/conf:/app/src/letsencrypt
+    - ./certbot/www:/app/src/certbot
     ports:
     - "8524:8524/tcp"
     networks:
@@ -60,6 +63,9 @@ services:
 
 networks:
   webnet:
+
+    #chmod +x init-letsencrypt.sh
+    #sudo ./init-letsencrypt.sh
 
     # db.createUser({
     #   user: "username",

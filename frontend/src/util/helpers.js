@@ -3,4 +3,4 @@ export const parseError = err => {
     return JSON.stringify(err, Object.getOwnPropertyNames(err));
 };
 
-export const backendEndpoint = `http://${window.location.hostname}:8524`;
+export const backendEndpoint = `${window.location.protocol}//${window.location.hostname}:8524`;

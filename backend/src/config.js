@@ -10,5 +10,6 @@ export const {
     SESSION_SECRET,
     SESSION_TTL,
     NODE_ENV,
+    HOSTNAME_FOLDER_NAME,
     CORS_WHITELIST
 } = process.env;
