@@ -32,6 +32,12 @@ function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
                                         <Link className="menu-item" to="/signup">Sign Up</Link>
                                     </>
                             }
+                            <div className="menu-item sub-menu" style={{zIndex: 500}}>
+                                <span>Demos</span>
+                                <div className="inner-menu">
+                                    <Link className="menu-item" to="/demos/media-modal">Media Modal</Link><br />
+                                </div>
+                            </div>
 
                             {/* {(isAdmin) ? <Link className="menu-item" to="/blogs/the-journal">The Journal</Link> : '' } */}
                             {/* <div className="menu-item sub-menu" style={{zIndex: 500}}>

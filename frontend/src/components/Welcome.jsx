@@ -14,8 +14,8 @@ export default () => (
             <div className="vid-content">
                 <div className="info-header" style={{ textAlign: 'center' }}>WEB DEVELOPMENT SERVICES</div>
                 <br />
-                <p>Need a Website to promote your business or an event, e.g weddings, and fundraisers. We can help!</p>
-                <p>With our web development services, we can create your own website or provide technical support for your existing website, e.g updating, and maintenance. Lets tailored a website to your needs.</p>
+                <p>Need a Website to promote your business or an event, e.g weddings, fundraisers, etc. We can help!</p>
+                <p>With our web development services, we can create your own website or provide technical support for your existing website, e.g updating, and maintenance. Let us tailor a website to your needs!</p>
             </div>
         </section>
     </WebPage>

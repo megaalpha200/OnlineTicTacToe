@@ -1,5 +1,5 @@
 #header-container {
-    background-color: black;
+    background-color: #000000CC;
     /*border: 1px solid #CC0000;*/
     /*border-radius: 40px;*/
     width: 100%;
@@ -66,6 +66,7 @@ header, nav {
 
 .menu-item:hover {
     background-color: #FFFFFF;
+    color: #000000;
 }
 
 #page-title{
@@ -81,6 +82,10 @@ header, nav {
     background-color: #FFFFFF;
     border-radius: 10px;
     box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.inner-menu .menu-item {
+    color: #000000;
 }
 
 #menu-button {

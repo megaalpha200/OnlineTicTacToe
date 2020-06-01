@@ -1,4 +1,7 @@
 import userRoutes from './user';
 import sessionRoutes from './session';
 
-export { userRoutes, sessionRoutes };
+export default apiRouter => {
+    apiRouter.use('/users', userRoutes);
+    apiRouter.use('/session', sessionRoutes);
+};

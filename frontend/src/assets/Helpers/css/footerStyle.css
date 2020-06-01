@@ -19,7 +19,7 @@
     height: auto;
     max-width: 100%;
     border-radius: 12px;
-    background-color: #1f1c1c;
+    background-color: #1f1c1ccc;
     padding-top: 1%;
     padding-bottom: 1%;
     position: relative;
@@ -51,5 +51,5 @@
 }
 
 #last-update-date:after {
-    content: '4/5/2020';
+    content: '5/31/2020';
 }

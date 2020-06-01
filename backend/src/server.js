@@ -2,7 +2,7 @@ import express from 'express';
 import mongoose from 'mongoose';
 import session from 'express-session';
 import connectStore from 'connect-mongo';
-import { userRoutes, sessionRoutes } from './routes';
+import routesSetup from './routes';
 import { PORT, HOSTNAME_FOLDER_NAME, NODE_ENV, MONGODB_URI, MONGODB_DATABASE_NAME, SESSION_NAME, SESSION_SECRET, SESSION_TTL } from './config';
 
 import http from 'http';
@@ -61,8 +61,7 @@ import { initializeSockets } from './Sockets';
 
         const apiRouter = express.Router();
         app.use('/api', apiRouter);
-        apiRouter.use('/users', userRoutes);
-        apiRouter.use('/session', sessionRoutes);
+        routesSetup(apiRouter);
 
         server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
     }
