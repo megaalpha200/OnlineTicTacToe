@@ -58,6 +58,7 @@ header, nav {
     border-radius: 10px;
     max-width: 12rem;
     display: inline-table;
+    text-decoration: none;
 }
 
 .sub-menu {
@@ -67,6 +68,8 @@ header, nav {
 .menu-item:hover {
     background-color: #FFFFFF;
     color: #000000;
+    cursor: pointer;
+    text-decoration: underline;
 }
 
 #page-title{

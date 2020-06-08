@@ -44,11 +44,16 @@ class Dashboard extends Component {
         const socket = SocketIOClient(endpoint);
 
         socket.on('testDataRetRes', data => {
-            data.date = new Date(data.timestamp)
+            try {
+                data.date = new Date(data.timestamp)
             
-            this.setState({
-                receivedData: data,
-            });
+                this.setState({
+                    receivedData: data,
+                });
+            }
+            catch(e) {
+
+            }
         });
     
         socket.emit('testDataRetReq', 1);
