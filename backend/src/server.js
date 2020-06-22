@@ -61,7 +61,7 @@ import { initializeSockets } from './Sockets';
 
         const apiRouter = express.Router();
         app.use('/api', apiRouter);
-        routesSetup(apiRouter);
+        routesSetup(apiRouter, client, MONGODB_DATABASE_NAME);
 
         server.listen(PORT, () => console.log(`Listening on port ${PORT}`));
     }

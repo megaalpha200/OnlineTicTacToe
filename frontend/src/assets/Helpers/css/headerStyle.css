@@ -7,7 +7,7 @@
     text-align: center;
     left: 0;
     right: 0;
-    z-index: 9998;
+    z-index: 9990;
     top: 0;
     position: fixed;
 }
@@ -47,7 +47,6 @@ header, nav {
     text-align: center;
     position: relative;
     display: inline;
-    height: 100%;
 }
 
 .menu-item {

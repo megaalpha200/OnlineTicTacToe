@@ -8,6 +8,7 @@ import mainHeaderImg from 'assets/Helpers/images/White.svg';
 import 'assets/Helpers/css/headerStyle.css';
 
 const motto = "Get it done with";
+const websiteTitle = "Template App";
 
 function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
     return(
@@ -15,7 +16,7 @@ function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
             <header>
                 <div id="header-container">
                     <p id="motto">{motto}</p>
-                    <Link to="/"><img id="header-img" src={mainHeaderImg} alt="Website title: Template App" /></Link>
+                    <Link to="/"><img id="header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
                     <nav>
                         <div id="menu-full">
                             <Link className="menu-item" to="/">Home</Link>
@@ -59,8 +60,8 @@ function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
                         <span id="page-title">{pageTitle}</span>
                     </nav>
                 </div>
+                <p id="head-sep"></p>
             </header>
-            <p id="head-sep"></p>
         </div>
     );
 }
@@ -70,7 +71,7 @@ function AltHeader() {
         <div>
             <div id="header-container">
                 <header>
-                    <Link to="/"><img id="alt-header-img" src={mainHeaderImg} alt="Website title J.A.A. Productions" /></Link>
+                    <Link to="/"><img id="alt-header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
                     <p id="alt-motto">{motto}</p>
                     <br />
                     <nav id="alt-nav">
