@@ -1,21 +1,17 @@
 import React from 'react';
-//import { Link } from 'react-router-dom';
+import { Link } from 'react-router-dom';
+import { Button } from 'reactstrap';
 import WebPage from 'components/Helpers/WebPage.jsx';
-import inkVid from 'assets/Helpers/images/link.mp4';
 
 import 'assets/Welcome/css/welcomeStyle.css';
 
 export default () => (
     <WebPage pageTitle="Welcome" pageHeading="Welcome!">
         <section>
-            <video autoPlay muted loop id="myVideo">
-                <source src={inkVid} type="video/mp4" />
-            </video>
-            <div className="vid-content">
-                <div className="info-header" style={{ textAlign: 'center' }}>WEB DEVELOPMENT SERVICES</div>
+            <div style={{ textAlign: 'center' }}>
+                <div className="info-header">TIC TAC TOE!</div>
                 <br />
-                <p>Need a Website to promote your business or an event, e.g weddings, fundraisers, etc. We can help!</p>
-                <p>With our web development services, we can create your own website or provide technical support for your existing website, e.g updating, and maintenance. Let us tailor a website to your needs!</p>
+                <Link to="/game"><Button color="success">Let's play some Tic Tac Toe! <span role="img" aria-label="happy face">😃</span></Button></Link>
             </div>
         </section>
     </WebPage>

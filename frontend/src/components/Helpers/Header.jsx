@@ -4,11 +4,12 @@ import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { logout } from 'actions/session';
 import { initializeHeader } from 'assets/Helpers/js/headerFunctions';
-import mainHeaderImg from 'assets/Helpers/images/White.svg';
+// import mainHeaderImg from '';
 import 'assets/Helpers/css/headerStyle.css';
 
-const motto = "Get it done with";
-const websiteTitle = "Template App";
+const motto = "";
+const websiteTitle = "Tic Tac Toe";
+const mainHeaderImg = "";
 
 function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
     return(
@@ -20,7 +21,8 @@ function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
                     <nav>
                         <div id="menu-full">
                             <Link className="menu-item" to="/">Home</Link>
-                            {
+                            <Link className="menu-item" to="/game">Tic Tac Toe</Link>
+                            {/* {
                                 (isAuthenticated)
                                 ?
                                     <>
@@ -32,13 +34,7 @@ function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
                                         <Link className="menu-item" to="/login">Log In</Link>
                                         <Link className="menu-item" to="/signup">Sign Up</Link>
                                     </>
-                            }
-                            <div className="menu-item sub-menu" style={{zIndex: 500}}>
-                                <span>Demos</span>
-                                <div className="inner-menu">
-                                    <Link className="menu-item" to="/demos/media-modal">Media Modal</Link><br />
-                                </div>
-                            </div>
+                            } */}
 
                             {/* {(isAdmin) ? <Link className="menu-item" to="/blogs/the-journal">The Journal</Link> : '' } */}
                             {/* <div className="menu-item sub-menu" style={{zIndex: 500}}>
@@ -73,10 +69,10 @@ function AltHeader() {
                 <header>
                     <Link to="/"><img id="alt-header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
                     <p id="alt-motto">{motto}</p>
-                    <br />
+                    {/* <br />
                     <nav id="alt-nav">
                         <Link id="back-button" to="/">{'<-- Back Home'}</Link>
-                    </nav>
+                    </nav> */}
                 </header>
             </div>
             <p id="head-sep-alt"></p>

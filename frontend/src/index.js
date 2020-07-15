@@ -4,7 +4,7 @@ import App from 'components/App.jsx';
 import configureStore from 'store/store';
 import { Provider } from 'react-redux';
 import { BrowserRouter } from 'react-router-dom';
-import { checkLoggedIn } from 'util/sessions';
+import { checkGameData } from 'util/game';
 
 const renderApp = preloadedState => {
   const store = configureStore(preloadedState)
@@ -30,4 +30,4 @@ const renderApp = preloadedState => {
   //window.getState = store.getState;
 };
 
-(async () => renderApp(await checkLoggedIn()))();
+(async () => renderApp(await checkGameData()))();

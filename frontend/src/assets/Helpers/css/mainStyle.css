@@ -28,7 +28,7 @@ html {
 }
 
 body {
-    background-color: #000000;
+    background-color: #FFFFFF;
 }
 
 article{
@@ -76,9 +76,9 @@ article section:nth-of-type(2n) a:hover, Link:hover, .btn-link:hover {
     color: black;
 }
 
-strong {
+/* strong {
     color: #FFFFFF;
-}
+} */
 
 #main-layout{
     /*border: 2px dashed #cc0000;*/

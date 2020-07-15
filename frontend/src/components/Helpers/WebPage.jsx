@@ -22,8 +22,10 @@ class WebPage extends React.Component {
   render() {
     return (
       <div>
-        <meta name="viewport" content="user-scalable=no, width=device-width" />
-        {(!this.props.embeddedPageMode) ? document.title = this.props.pageTitle + ' - Template App' : ''}
+        <head>
+          <meta name="viewport" content="user-scalable=no, width=device-width" />
+          {(!this.props.embeddedPageMode) ? document.title = this.props.pageTitle + ' - Tic Tac Toe' : ''}
+        </head>
   
         {
             (this.props.headerFooterShow) ? 

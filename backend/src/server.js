@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import session from 'express-session';
 import connectStore from 'connect-mongo';
 import routesSetup from './routes';
-import { PORT, HOSTNAME_FOLDER_NAME, NODE_ENV, MONGODB_URI, MONGODB_DATABASE_NAME, SESSION_NAME, SESSION_SECRET, SESSION_TTL } from './config';
+import { PORT, HOSTNAME_FOLDER_NAME, NODE_ENV, MONGODB_URI, MONGODB_DATABASE_NAME, SESSION_NAME, SESSION_SECRET, SESSION_TTL, LOCAL_SSL } from './config';
 
 import http from 'http';
 import https from 'https';
@@ -12,6 +12,8 @@ import mongo from 'mongodb';
 import SocketIO from 'socket.io';
 import { initializeSockets } from './Sockets';
 
+const shouldUseLocalSSLCerts = LOCAL_SSL === 'true';
+
 (async () => {
     try {
         const app = express();
@@ -19,7 +21,7 @@ import { initializeSockets } from './Sockets';
         const path = `${__dirname}/letsencrypt/live/${HOSTNAME_FOLDER_NAME}`;
         var options = {};
 
-        if (NODE_ENV === 'production') {
+        if (shouldUseLocalSSLCerts) {
             options = {
                 key: fs.readFileSync(`${path}/privkey.pem`),
                 cert: fs.readFileSync(`${path}/fullchain.pem`)
@@ -27,7 +29,7 @@ import { initializeSockets } from './Sockets';
         }
 
         const MongoClient = mongo.MongoClient;
-        const server = (NODE_ENV === 'production') ? https.createServer(options, app) : http.createServer(app);
+        const server = (shouldUseLocalSSLCerts) ? https.createServer(options, app) : http.createServer(app);
         const io = SocketIO(server);
 
         await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
