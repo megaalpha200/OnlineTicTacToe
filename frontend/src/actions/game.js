@@ -32,7 +32,7 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
         if (shouldAssignPlayer) sessionData.assignedPlayer = gameData.assignedPlayer;
 
         await apiUtil.persistGameSession(sessionData);
-        if (shouldRefresh) window.location.reload();
+        if (shouldRefresh) dispatch(initializeData(gameData.session_id, gameData.assignedPlayer));
 
         delete gameData._id;
         return dispatch(action(gameData));

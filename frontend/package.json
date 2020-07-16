@@ -13,6 +13,7 @@
     "joi": "^14.3.1",
     "jquery": "^3.5.1",
     "prop-types": "^15.7.2",
+    "psl": "^1.8.0",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
     "react-redux": "^7.2.0",
@@ -27,6 +28,7 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
+    "deploy": "aws s3 sync build/ s3://tictactoeonline.tk",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
