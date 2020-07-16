@@ -118,16 +118,16 @@ sleep 2
 echo
 
 #9. Get SSL Certificate(s)
-# if [ "$persistCertbot" == true ]; then
-#     echo "### Restoring the certbot Folder..."
-#     sudo cp -r ./certbot ./production/certbot
-#     sudo rm -r ./certbot
-# fi
-# (cd ./production && chmod +x ./init-letsencrypt.sh && ./init-letsencrypt.sh)
+if [ "$persistCertbot" == true ]; then
+    echo "### Restoring the certbot Folder..."
+    sudo cp -r ./certbot ./production/certbot
+    sudo rm -r ./certbot
+fi
+(cd ./production && chmod +x ./init-letsencrypt.sh && ./init-letsencrypt.sh)
 
-# echo "### Sleeping..."
-# sleep 2
-# echo
+echo "### Sleeping..."
+sleep 2
+echo
 
 #10. Deploy the Docker stack.
 echo "### Deploying Docker Stack..."
