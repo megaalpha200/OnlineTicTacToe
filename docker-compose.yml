@@ -53,9 +53,9 @@ services:
     restart: always
     # depends_on:
     # - mongo
-    # volumes:
-    # - ./certbot/conf:/app/src/letsencrypt
-    # - ./certbot/www:/app/src/certbot
+    volumes:
+    - ./certbot/conf:/app/src/letsencrypt
+    - ./certbot/www:/app/src/certbot
     ports:
     - "8524:8524/tcp"
     networks:
