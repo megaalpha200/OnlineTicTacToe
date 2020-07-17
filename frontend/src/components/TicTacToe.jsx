@@ -171,7 +171,7 @@ class TicTacToe extends Component {
                         ?
                             <>
                                 <br />
-                                <h6><u>Send this link to your friend to start playing:</u><br /><strong>{`${currentLocation}/game/${this.props.game.session_id}`}</strong></h6>
+                                <h6 style={{ wordWrap: 'break-word' }}><u>Send this link to your friend to start playing:</u><br /><strong>{`${currentLocation}/game/${this.props.game.session_id}`}</strong></h6>
                             </>
                         :
                             ""
