@@ -44,6 +44,11 @@ const shouldUseLocalSSLCerts = LOCAL_SSL === 'true';
         app.disable('x-powered-by');
         app.use(express.urlencoded({ extended: true }));
         app.use(express.json());
+        
+        if (NODE_ENV === 'production' && !shouldUseLocalSSLCerts) {
+            app.set('trust proxy', 1);
+        }
+
         app.use(session({
             name: SESSION_NAME,
             secret: SESSION_SECRET,

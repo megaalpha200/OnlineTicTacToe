@@ -87,14 +87,19 @@ gameRouterAPI.delete('', (req, res) => {
 gameRouterAPI.get('', async (req, res) => {
     addHeaders(req, res);
 
-    const session_id = req.session.session_id;
-    const gameData = await gameDAO.retrieveGameData(session_id);
-    
-    if (gameData) {
-        gameData.assignedPlayer = req.session.assignedPlayer;
-    }
+    try {
+        const session_id = req.session.session_id;
+        const gameData = await gameDAO.retrieveGameData(session_id);
+        
+        if (gameData) {
+            gameData.assignedPlayer = req.session.assignedPlayer;
+        }
 
-    res.send({ gameData });
+        res.send({ gameData });
+    }
+    catch(err) {
+        res.status(404).send(parseError(err));
+    }
 });
 
 export default gameRouterAPI;
