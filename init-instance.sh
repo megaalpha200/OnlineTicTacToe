@@ -2,26 +2,29 @@
 
 #Initializes the AWS Instance
 
+#Variables
+githubRepoName="OnlineTicTacToe" #Replace this with the name of the GitHub Repo
+
 #Create Swap Partition
 echo "### Creating Swap Partition..."
-sudo dd if=/dev/zero of=/swapfile count=2048 bs=1MiB
-sudo chmod 600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
-echo "/swapfile swap swap sw 0 0" | sudo tee -a /etc/fstab
+dd if=/dev/zero of=/swapfile count=2048 bs=1MiB
+chmod 600 /swapfile
+mkswap /swapfile
+swapon /swapfile
+echo "/swapfile swap swap sw 0 0" | tee -a /etc/fstab
 echo
 
 #Check for Package Updates
 echo "### Checking for Package Updates..."
-yum check-update && sudo yum update -y && sudo yum upgrade -y && yum clean packages
+yum check-update && yum update -y && yum upgrade -y && yum clean packages
 echo
 
 echo "### Installing Docker, Git, Python 3, PIP, and htop..."
-sudo yum install docker git python3 python3-pip -y htop
+yum install docker git python3 python3-pip -y htop
 echo
 
 echo "### Installing Docker Compose..."
-sudo pip3 install docker-compose
+pip3 install docker-compose
 echo
 
 success=1
@@ -41,10 +44,10 @@ else
 fi
 
 if [ -x "$(command -v docker-compose)" ]; then
-    sudo groupadd docker
-    sudo usermod -aG docker "$USER"
-    sudo systemctl start docker
-    sudo systemctl enable docker
+    groupadd docker
+    usermod -aG docker ec2-user
+    systemctl start docker
+    systemctl enable docker
     echo "Docker Compose Installed Successfully!" >&2
 else
     echo "Error! Docker Compose could not install successfully!" >&2
@@ -54,17 +57,13 @@ fi
 echo
 
 if [ $success == 1 ]; then
-    read -p "Enter the name of project directory? " proDir
-    if [ ! -d "./$proDir" ]; then
-        mkdir $proDir
-        echo
-        echo "Navigate to the project directory using \"cd $(pwd)/$proDir\""
-    else
-        echo "The folder already exists! Try making a folder with a different name using \"mkdir <folderName>\""
-    fi
+    mkdir /home/ec2-user/"$githubRepoName"
+    chown ec2-user:ec2-user /home/ec2-user/"$githubRepoName"
+    echo "Navigate to the project directory using \"cd /home/ec2-user/$githubRepoName\""
+    echo
     echo
     echo "Yay! Everything was successfully initialized!"
-    echo "Please run \"sudo reboot -h now\" to restart the instance and complete the installations!"
+    sudo reboot -h now
 else
     echo "Oh no! Something went horribly wrong!"
 fi
