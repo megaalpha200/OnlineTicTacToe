@@ -12,19 +12,6 @@ if [ ! -x "$(command -v docker-compose)" ]; then
   exit 1
 fi
 
-if [ ! -f "./.env" ]; then
-    echo "Please create a .env file under this directory!"
-    exit 1
-fi
-
-# if [ ! -d "./build" ]; then
-#     echo "Please upload the build folder under this directory!"
-#     exit 1
-# fi
-
-echo "CREATE A .env FILE IN THE SAME FOLDER AS THIS FILE BEFORE RUNNING THIS SCRIPT!"
-echo
-
 #1. Clone/Pull repository from GitHub.
 read -p "Should I Pull from GitHub? (y/N) " ghDecision
 if [ "$ghDecision" == "Y" ] || [ "$ghDecision" == "y" ]; then
@@ -59,49 +46,37 @@ if [ -d "./production" ]; then
         sudo rm -r ./production
         echo "### Creating Production Folder..."
         mkdir production
+
+        #2a. Copy contents of GitHub repository clone into the "production" folder.
+        echo "### Copying Repository Folder Contents to Production..."
+        cp -a "./$githubRepoName/." ./production
+        echo
     fi
 else
     echo "### Creating Production Folder..."
     mkdir production
+
+    #2a. Copy contents of GitHub repository clone into the "production" folder.
+    echo "### Copying Repository Folder Contents to Production..."
+    cp -a "./$githubRepoName/." ./production
+    echo
 fi
 echo
 
-#3. Copy contents of GitHub repository clone into the "production" folder.
-echo "### Copying Repository Folder Contents to Production..."
-cp -a "./$githubRepoName/." ./production
-echo
-
-#4. Copy the ".env" file into the root of the production/backend folder.
-echo "### Copying .env File to Production Backend..."
-cp ./.env ./production/backend/.env
-echo
-
-#5. Copy the "build" folder into the root of the production/frontend folder.
-# echo "### Copying build folder to Production Frontend..."
-# cp -r ./build ./production/frontend/build
-# echo
-
-#6. Check if a login is present for Docker. If so continue, if not request login. If login unsuccessful, then exit.
-# echo "### Checking Docker Login Status..."
-# if [ ! grep -q "index.docker.io" ~/.docker/config.json ]; then
-#     docker login
-# fi
+#3. Check if a login is present for Docker. If so continue, if not request login. If login unsuccessful, then exit.
 echo "### Logging in to Docker Hub..."
 docker login
 echo
 
-#7. Build & Push the Docker Containers.
-read -p "Should I Re-build the Docker Images? (y/N) " dockerBuildDecision
-if [ "$dockerBuildDecision" == 'Y' ] || [ "$dockerBuildDecision" == 'y' ]; then
-    echo "### Building Docker Containers..."
-    (cd ./production && docker-compose build)
-    echo
-    echo "### Pushing Docker Containers..."
-    (cd ./production && docker-compose push)
+#4. Pull the Docker Containers.
+read -p "Should I Pull the Docker Images? (y/N) " dockerPullDecision
+if [ "$dockerPullDecision" == 'Y' ] || [ "$dockerPullDecision" == 'y' ]; then
+    echo "### Pulling Docker Containers..."
+    (cd ./production && docker-compose pull)
     echo
 fi
 
-#8. Verifying if Docker Swarm is Initialized
+#5. Verifying if Docker Swarm is Initialized
 case "$(docker info --format '{{.Swarm.LocalNodeState}}')" in
 inactive)
     echo "### Initializing Docker Swarm...";
@@ -117,7 +92,7 @@ esac
 sleep 2
 echo
 
-#9. Get SSL Certificate(s)
+#6. Get SSL Certificate(s)
 if [ "$persistCertbot" == true ]; then
     echo "### Restoring the certbot Folder..."
     sudo cp -r ./certbot ./production/certbot
@@ -129,12 +104,12 @@ echo "### Sleeping..."
 sleep 2
 echo
 
-#10. Deploy the Docker stack.
+#7. Deploy the Docker stack.
 echo "### Deploying Docker Stack..."
 (cd ./production && docker stack deploy -c docker-compose.yml "$dockerStackName")
 echo
 
-#11. Clean Up Docker Cache
+#8. Clean Up Docker Cache
 read -p "Should I Clean Up the Docker Cache? (y/N) " dockerCleanDecision
 if [ "$dockerCleanDecision" == 'Y' ] || [ "$dockerCleanDecision" == 'y' ]; then
     echo "### Cleaning Up Docker Cache..."

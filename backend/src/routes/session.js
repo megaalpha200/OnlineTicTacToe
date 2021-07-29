@@ -6,10 +6,15 @@ import { signIn } from '../validations/user';
 //import { AES } from 'crypto-js';
 import { parseError, sessionizeUser, corsOptionsDelegate, addHeaders } from '../util/helpers';
 import { SESSION_NAME } from '../config';
+import SessionsDAO from '../DAO/sessionsDAO';
 
 const sessionRouter = express.Router();
 
 sessionRouter.options('', cors(corsOptionsDelegate), (req, res) => {
+    addHeaders(req, res);
+});
+
+sessionRouter.options('/get-user-sessions', cors(corsOptionsDelegate), (req, res) => {
     addHeaders(req, res);
 });
 
@@ -57,11 +62,38 @@ sessionRouter.delete('', (req, res) => {
     }
 });
 
-sessionRouter.get('', (req, res) => {
+sessionRouter.get('', async (req, res) => {
     addHeaders(req, res);
 
     const user = req.session.user;
-    res.send({ user });
+
+    if (user) {
+        var updatedUser = await User.findOne({ _id: user.userId });
+    
+        if (updatedUser) {
+            updatedUser = sessionizeUser(updatedUser);
+            req.session.user = updatedUser;
+            return res.send({ user: updatedUser });
+        }
+    }
+
+    return res.send({ user });
+});
+
+sessionRouter.get('/get-user-sessions', async (req, res) => {
+    addHeaders(req, res);
+
+    try {
+        const userId = req.session.user.userId;
+
+        if (userId) {
+            const result = await SessionsDAO.getUserSessions(userId);
+            res.status(200).send(result);
+        }
+    }
+    catch (err) {
+        res.status(401).send(parseError(err));
+    }
 });
 
 export default sessionRouter;

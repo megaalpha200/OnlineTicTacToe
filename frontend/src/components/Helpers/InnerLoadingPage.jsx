@@ -1,15 +1,32 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Spinner } from 'reactstrap';
 
-function InnerLoadingPage() {
-    return(
-        <section>
-            <h2 style={{textAlign: "center", fontStyle: "italic"}}>Loading...</h2><br />
-            <div className="d-flex justify-content-center">
-                <Spinner type="grow" color="dark" style={{width: "5rem", height: "5rem"}} role="status"></Spinner>
-            </div>
-        </section>
-    );
+const InnerLoadingPage = props => (
+    <section>
+        {
+            (props.spinnerOnly)
+            ?
+                ""
+            :
+                <div><h2 style={{textAlign: "center", fontStyle: "italic"}}>Loading...</h2><br /></div>
+        }
+        <div className={`d-flex justify-content-${props.align}`}>
+            <Spinner type="grow" color="dark" style={{width: `${props.size}rem`, height: `${props.size}rem`}} role="status"></Spinner>
+        </div>
+    </section>
+);
+
+InnerLoadingPage.propTypes = {
+    spinnerOnly: PropTypes.bool,
+    align: PropTypes.string,
+    size: PropTypes.number
+};
+
+InnerLoadingPage.defaultProps = {
+    spinnerOnly: false,
+    align: 'center',
+    size: 5
 }
 
 export default InnerLoadingPage;

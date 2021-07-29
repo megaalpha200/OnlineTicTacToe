@@ -1,0 +1,49 @@
+version: 0.2
+
+#VARS:
+#   SKIP_BUILD
+#   LETS_ENCRYPT_DECISION
+#   BACKEND_ENV
+
+env:
+    variables:
+        SKIP_BUILD: "false"
+        
+    parameter-store:
+        BACKEND_ENV: backendEnv
+        DOCKER_USERNAME: DOCKER_USERNAME
+        DOCKER_PASSWORD: DOCKER_PASSWORD
+
+phases:
+    install:
+        runtime-versions:
+            docker: 19
+        # commands:
+        #     - echo "Installing dependencies..."
+        #     - yum install docker python3 python3-pip dos2unix -y
+        #     - pip3 install docker-compose
+    pre_build:
+        commands:
+            - echo "PRE BUILD - Logging into Docker..."
+            - echo "$DOCKER_PASSWORD" | docker login --username $DOCKER_USERNAME --password-stdin
+            - (cd ./backend && echo $BACKEND_ENV | tr " " "\n" > .env)
+    build:
+        commands:
+            - |
+                if [ "$SKIP_BUILD" = false ]; then
+                    echo "BUILD - Building & Pushing Docker Containers..."
+                    docker-compose pull
+                    docker-compose build
+                    docker-compose push
+                fi
+    post_build:
+        commands:
+            # - echo "POST BUILD - Zipping CodeDeploy Files..."
+            # - (cd ./codedeploy/ && dos2unix pull_docker_images.sh)
+            # - (cd ./codedeploy/ && zip -r ../codedeploy.zip * ../docker-compose.yml)
+            - echo $LETS_ENCRYPT_DECISION > .led
+            - echo "POST BUILD - Building Complete!"
+
+artifacts:
+    files:
+    - ./**/*

@@ -1,151 +1,88 @@
-import React, { Component } from 'react';
+import React, { useState } from 'react';
 import { connect } from 'react-redux';
-import { logout } from 'actions/session';
-import { backendEndpoint } from 'util/helpers';
-import SocketIOClient from 'socket.io-client';
-import { Label, Input, Button } from 'reactstrap';
+import history from 'util/history';
+import { toggleEditMarqueeText, updateMarqueeText, clearMarqueeText, updateLastUpdateDate } from 'actions/site_info';
+import { clearAllSessions } from 'actions/session';
+import { Badge, Button } from '@material-ui/core';
+import { Edit as EditIcon, Close as CloseIcon, ClearAll as ClearIcon, Send as UpdateTextIcon, PersonAdd as NewUserIcon, DeleteSweep, AccountCircle as AccountIcon, Update as UpdateTimeIcon } from '@material-ui/icons';
+import Console from 'components/User/Console.jsx';
+import ChangeUserAccountDetailsModal from 'components/User/ChangeUserAccountDetailsDialog.jsx';
 import WebPage from 'components/Helpers/WebPage.jsx';
 
-const socketEndpoint = `${backendEndpoint}/templatedb`;
-const apiEndpoint = `${backendEndpoint}/api/template`;
-
-const mapStateToProps = ({ session }) => ({
-    session
+const mapStateToProps = ({ session: { userId, username, isAdmin, isPseudoAdmin }, site_info: { canEditMarqueeText } }) => ({
+    username,
+    isAdmin: Boolean(userId) && Boolean(isAdmin),
+    isPseudoAdmin: Boolean(userId) && Boolean(isPseudoAdmin),
+    canEditMarqueeText
 });
 
 const mapDispatchToProps = dispatch => ({
-    logout: () => dispatch(logout())
+    toggleEditMarqueeText: () => dispatch(toggleEditMarqueeText()),
+    updateLastUpdateDate: () => dispatch(updateLastUpdateDate()),
+    clearMarqueeText: () => dispatch(clearMarqueeText()),
+    updateMarqueeText: () => dispatch(updateMarqueeText()),
+    clearAllSessions: () => dispatch(clearAllSessions())
 });
 
-class Dashboard extends Component {
-    state = {
-        testInput: "",
-        receivedDataSockets: {
-            data: '',
-            timestamp: 0,
-            date: "",
-        },
-        receivedDataAPI: {
-            data: '',
-            timestamp: 0,
-            date: "",
-        },
-    };
+const Dashboard  = props => {
+    const [isAccountDetailsModalOpen, setIsAccountDetailsModalOpen] = useState(false);
 
-    componentDidMount = () => {
-        this.receiveTestDataViaSockets();
-        this.receiveTestDataViaAPI();
+    const marqueeEditActions = [];
+
+    if (props.canEditMarqueeText) {
+        marqueeEditActions.push({ name: 'Update Marquee Text', icon: <UpdateTextIcon />, onClick: () => props.updateMarqueeText() });
+        marqueeEditActions.push({ name: 'Clear Marquee Text', icon: <ClearIcon />, onClick: () => props.clearMarqueeText() });
     }
 
-    sendTestDataViaSockets = () => {
-        const socket = SocketIOClient(socketEndpoint);
-    
-        socket.on('testDataSendRes', data => {
-            alert(data);
-        });
-    
-        socket.emit('testDataSendReq', { _id: 1,  data: this.state.testInput });
-    };
-
-    sendTestDataViaAPI = async () => {
-        const res = await fetch(`${apiEndpoint}/send`, { 
-            method: 'POST',
-            mode: 'cors',
-            credentials: 'include',
-            body: JSON.stringify({ _id: 1,  data: this.state.testInput }),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await res.json();
-        alert(data);
-    }
-
-    receiveTestDataViaSockets = () => {
-        const socket = SocketIOClient(socketEndpoint);
-
-        socket.on('testDataRetRes', data => {
-            try {
-                data.date = new Date(data.timestamp);
-            
-                this.setState({
-                    receivedDataSockets: data,
-                });
-            }
-            catch(e) {
-
-            }
-        });
-    
-        socket.emit('testDataRetReq', 1);
-    }
-
-    receiveTestDataViaAPI = async () => {
-        const res = await fetch(`${apiEndpoint}/retrieve`, { 
-            method: 'POST',
-            mode: 'cors',
-            credentials: 'include',
-            body: JSON.stringify({ _id: 1}),
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-
-        const data = await res.json();
-        data.date = new Date(data.timestamp);
-
-        this.setState({
-            receivedDataAPI: data,
-        });
-    }
-
-    handleChange = e => {
-        const target = e.target;
-        const name = target.name;
-
-        this.setState({
-            [name]: target.value,
-        });
-    }
-
-   render() {
     return(
-        <WebPage pageTitle="Dashboard" pageHeading="Dashboard">
+        <WebPage pageTitle={`${(props.isAdmin || props.isPseudoAdmin) ? 'Admin ' : ''}Dashboard`} pageHeading={`${(props.isAdmin || props.isPseudoAdmin) ? 'Admin ' : ''}Dashboard`}
+            adminSettingsFABActionData={
+                {
+                    actions: [
+                        ...marqueeEditActions,
+                        { name: (props.canEditMarqueeText) ? 'Close Marquee Text Editing' : 'Edit Marquee Text', icon: (props.canEditMarqueeText) ? <CloseIcon /> : <EditIcon />, onClick: () => props.toggleEditMarqueeText() },
+                        { name: 'Set Last Update Timestamp', icon: <UpdateTimeIcon />, onClick: () => props.updateLastUpdateDate() },
+                        { name: 'Update My Account Details', icon: <AccountIcon />, onClick: () => setIsAccountDetailsModalOpen(true) },
+                        { name: 'Add New User', icon: <NewUserIcon />, onClick: () => history.push('/signup-new-user'), adminOnly: true },
+                        { name: 'Clear User Sessions', icon: <DeleteSweep />, onClick: () => props.clearAllSessions(), adminOnly: true }
+                    ],
+                    keepOpen: false
+                }
+            }
+        >
             <section>
-                <h1>Hi {this.props.session.username}</h1>
-                <p>You are now logged in!</p>
-                <Button color="danger" onClick={this.props.logout}>Log Out</Button>
+                <ChangeUserAccountDetailsModal isOpen={isAccountDetailsModalOpen} onClose={() => setIsAccountDetailsModalOpen(false)} />
+                <div className="dashboard-top-container" style={{ display: 'flex', flexWrap: 'wrap' }}>
+                    <div className="username-container" style={{ flexGrow: '10' }}>
+                        {
+                            (props.isAdmin || props.isPseudoAdmin)
+                            ?
+                                <Badge color={(props.isAdmin) ? "error" : "secondary"} badgeContent={`${(props.isAdmin) ? "" : "Pseudo " }Admin`}>
+                                    <h1>Hi {props.username}&nbsp;</h1>
+                                </Badge>
+                            :
+                                <h1>Hi {props.username}&nbsp;</h1>
+                        }
+                        <p>You are now logged in!</p>
+                    </div>
+                    <div className="account-details-btn-container" style={{ flexGrow: '1', textAlign: 'right' }}>
+                        {
+                            (!props.isAdmin && !props.isPseudoAdmin)
+                            ?
+                            <Button color="primary" variant="contained" onClick={() => setIsAccountDetailsModalOpen(true)}>Update My Account Details</Button>
+                            :
+                                ""
+                        }
+                    </div>
+                </div>
                 <br />
                 <br />
-                <Label for="testInput">Test Data:</Label>
-                <Input name="testInput" type="text" onChange={this.handleChange} />
+                <Console />
                 <br />
                 <br />
-                <Button color="primary" onClick={() => this.sendTestDataViaSockets()}>Send Test Data via Sockets</Button>
-                &nbsp;
-                <Button color="primary" onClick={() => this.receiveTestDataViaSockets()}>Receive Test Data via Sockets</Button>
-                <br />
-                <br />
-                <h1>Sockets:</h1>
-                <h2><u>Received Data:</u></h2>
-                <p><u>Data Received:</u> {this.state.receivedDataSockets.data}</p>
-                <p><u>Date Submitted:</u> {this.state.receivedDataSockets.date.toString()}</p>
-                <br />
-                <br />
-                <Button color="primary" onClick={() => this.sendTestDataViaAPI()}>Send Test Data via API</Button>
-                &nbsp;
-                <Button color="primary" onClick={() => this.receiveTestDataViaAPI()}>Receive Test Data via API</Button>
-                <br />
-                <br />
-                <h1>API Routes:</h1>
-                <h2><u>Received Data:</u></h2>
-                <p><u>Data Received:</u> {this.state.receivedDataAPI.data}</p>
-                <p><u>Date Submitted:</u> {this.state.receivedDataAPI.date.toString()}</p>
             </section>
         </WebPage>
     );
-   }
 }
 
 export default connect(

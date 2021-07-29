@@ -44,30 +44,38 @@ const shouldUseLocalSSLCerts = LOCAL_SSL === 'true';
         app.disable('x-powered-by');
         app.use(express.urlencoded({ extended: true }));
         app.use(express.json());
-        
-        if (NODE_ENV === 'production' && !shouldUseLocalSSLCerts) {
-            app.set('trust proxy', 1);
-        }
 
-        app.use(session({
+        if (NODE_ENV === 'production' && !shouldUseLocalSSLCerts) app.set('trust proxy', 1);
+        
+        const sessionMiddleware = session({
             name: SESSION_NAME,
             secret: SESSION_SECRET,
             saveUninitialized: false,
-            resave: false,
+            resave: true,
             store: new MongoStore({
                 mongooseConnection: mongoose.connection,
                 collection: 'session',
-                ttl: parseInt(SESSION_TTL) / 1000
+                ttl: parseInt(SESSION_TTL) / 1000,
+                stringify: false
             }),
             cookie: {
                 sameSite: true,
                 secure: NODE_ENV === 'production',
                 maxAge: parseInt(SESSION_TTL)
             }
-        }));
+        });
+
+        io.use((socket, next) => {
+            sessionMiddleware(socket.request, socket.request.res || {}, next);
+        });
+
+        app.use(sessionMiddleware);
 
         const apiRouter = express.Router();
         app.use('/api', apiRouter);
+        app.use((_, res) => {
+            res.status(302).redirect(`https://${HOSTNAME_FOLDER_NAME}`);
+        });
         routesSetup(apiRouter, client, MONGODB_DATABASE_NAME);
 
         server.listen(PORT, () => console.log(`Listening on port ${PORT}`));

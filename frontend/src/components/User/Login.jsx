@@ -2,11 +2,9 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { login } from 'actions/session';
-import { Form, FormGroup, Label, Input, Button } from 'reactstrap';
+import { hashEmail, hashPassword } from 'util/helpers';
+import { Form, FormGroup, Label, Input, Button, InputGroup, InputGroupAddon } from 'reactstrap';
 import WebPage from 'components/Helpers/WebPage.jsx';
-
-import SHA256 from 'crypto-js/sha256';
-import bcrypt from 'bcryptjs';
 
 const mapStateToProps = ({ errors }) => ({
     errors
@@ -20,6 +18,7 @@ class Login extends Component {
     state = {
         login_email: '',
         login_password: '',
+        showPassword: false,
     };
 
     handleSubmit = e => {
@@ -27,8 +26,8 @@ class Login extends Component {
 
         const { login_email, login_password } = this.state;
 
-        const emailHash = bcrypt.hashSync(login_email, `$2b$10$${SHA256(login_email).toString().slice(-22)}`).slice(-40);
-        const passHash = bcrypt.hashSync(login_password, `$2b$10$${SHA256(login_email + login_password).toString().slice(-22)}`).slice(-40);
+        const emailHash = hashEmail(login_email);
+        const passHash = hashPassword(login_email, login_password);
 
         const user = {
             email: login_email,
@@ -48,6 +47,7 @@ class Login extends Component {
             this.setState({
                 login_email: '',
                 login_password: '',
+                showPassword: false,
             });
         }
         else {
@@ -56,6 +56,8 @@ class Login extends Component {
             });
         }
     }
+
+    togglePasswordShow = () => this.setState({ showPassword: !this.state.showPassword });
 
     render() {
         return (
@@ -67,20 +69,33 @@ class Login extends Component {
                             <Label for="login_email">
                                 Email:
                             </Label>
-                            <Input type="email" name="login_email" onChange={this.handleChange} required />
+                            <Input type="email" name="login_email" value={this.state.login_email} onChange={this.handleChange} required />
                         </FormGroup>
                         <FormGroup>
                             <Label for="login_password">
                             Password:
                             </Label>
-                            <Input type="password" name="login_password" onChange={this.handleChange} required />
+                            <InputGroup>
+                                <Input type={(this.state.showPassword) ? 'text' : 'password'} name="login_password" value={this.state.login_password} onChange={this.handleChange} required />
+                                <InputGroupAddon addonType="append">
+                                    <Button color="light" onClick={this.togglePasswordShow}>
+                                        {
+                                            (this.state.showPassword)
+                                            ?
+                                                <span className="fas fa-eye-slash"></span>
+                                            :
+                                                <span className="fas fa-eye"></span>
+                                        }
+                                    </Button>
+                                </InputGroupAddon>
+                            </InputGroup>
                         </FormGroup>
                         <Button type="submit" color="success">Log In</Button>
                         &nbsp;
                         <Button type="reset" name="RESET_BTN" color="danger" onClick={this.handleChange}>Clear</Button>
                     </Form>
                     <br />
-                    <Link to="/signup">Sign Up</Link>
+                    <Link to="/signup">Need an Account? Click Here to Create One!</Link>
                 </section>
             </WebPage>
         );

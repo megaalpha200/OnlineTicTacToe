@@ -1,127 +1,184 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import history from 'util/history';
 import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { logout } from 'actions/session';
-import { initializeHeader } from 'assets/Helpers/js/headerFunctions';
-// import mainHeaderImg from '';
+import { logout, subscribeToSessionValidation } from 'actions/session';
+import { toggleEditMarqueeText, setMarqueeText } from 'actions/site_info';
+import { initializeHeader, toggleMobileHeader } from 'assets/Helpers/js/headerFunctions';
+// import { combinedQueryURL } from 'util/helpers';
+import AdminSettingsFAB from 'components/Helpers/AdminSettingsFAB.jsx';
+import Marquee from 'components/Helpers/Marquee.jsx';
+import { ExitToApp as LogOutIcon, SupervisorAccount as ConsoleIcon } from '@material-ui/icons';
+import mainHeaderImg from 'assets/Helpers/images/jaa2.png';
 import 'assets/Helpers/css/headerStyle.css';
 
-const motto = "";
-const websiteTitle = "Tic Tac Toe";
-const mainHeaderImg = "";
+const motto = "Let's play some Tic Tac Toe! 😀";
+const websiteTitle = "Online Tic-Tac-Toe";
 
-function NormalHeader(pageTitle, isAuthenticated, logout) { //, isAdmin) {
+const NormalHeader = props => {
+    const menuItems = (
+        <div>
+            <span></span>
+            <span></span>
+        </div>
+    );
+
     return(
         <div>
-            <header>
-                <div id="header-container">
-                    <p id="motto">{motto}</p>
-                    <Link to="/"><img id="header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
-                    <nav>
-                        <div id="menu-full">
-                            <Link className="menu-item" to="/">Home</Link>
-                            <Link className="menu-item" to="/game">Tic Tac Toe</Link>
-                            {/* {
-                                (isAuthenticated)
-                                ?
-                                    <>
-                                        <Link className="menu-item" to="/dashboard">Dashboard</Link>
-                                        <Link className="menu-item" onClick={() => logout()}>Log Out</Link>
-                                    </>
-                                :
-                                    <>
-                                        <Link className="menu-item" to="/login">Log In</Link>
-                                        <Link className="menu-item" to="/signup">Sign Up</Link>
-                                    </>
-                            } */}
-
-                            {/* {(isAdmin) ? <Link className="menu-item" to="/blogs/the-journal">The Journal</Link> : '' } */}
-                            {/* <div className="menu-item sub-menu" style={{zIndex: 500}}>
-                                <span>Downloads</span>
-                                <div className="inner-menu">
-                                    <Link className="menu-item" to="/downloads/alienbrowser">AlienBrowser</Link><br />
-                                    <Link className="menu-item" to="/downloads/alientimer">AlienTimer</Link>
-                                    <Link className="menu-item" to="/downloads/html-editor">HTML Editor</Link>
-                                    <Link className="menu-item" to="/downloads/mobile-sync">Mobile Sync</Link>
-                                    <Link className="menu-item" to="/downloads/jaa-productions-updater">J.A.A. Productions Updater</Link>
-                                </div>
-                            </div> */}
-                        </div>
-                        <div align="right" id="menu-button">
-                            <div></div>
-                            <div></div>
-                            <div></div>
-                        </div>
-                        <span id="page-title">{pageTitle}</span>
-                    </nav>
+            <Link to="/"><img id="header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
+            <p id="motto">{motto}</p>
+            <nav>
+                {/* Full Menu */}
+                <div id="menu-full">
+                    {menuItems}
                 </div>
-                <p id="head-sep"></p>
-            </header>
+                {/* **** */}
+
+                {/* Mobile Menu */}
+                <div id="menu-mobile" hidden={true}>
+                    {menuItems.props.children.map(element => (Array.isArray(element.props.children) && !element.props.className) ? element.props.children.map(subElement => <p>{subElement}</p>) : <p>{element}</p>)}
+                </div>
+                <br />
+                <span id="page-title">{props.pageTitle}</span>
+                <br />
+                {/* <div id="menu-button">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div> */}
+                {/* <MenuIcon id="menu-button" onClick={() => props.setIsMobileMenuOpen(toggleMobileHeader())} /> */}
+                {/* **** */}
+            </nav>
         </div>
     );
 }
 
-function AltHeader() {
+const AltHeader = () => {
     return(
         <div>
-            <div id="header-container">
-                <header>
-                    <Link to="/"><img id="alt-header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
-                    <p id="alt-motto">{motto}</p>
-                    {/* <br />
-                    <nav id="alt-nav">
-                        <Link id="back-button" to="/">{'<-- Back Home'}</Link>
-                    </nav> */}
-                </header>
-            </div>
-            <p id="head-sep-alt"></p>
+            <Link to="/"><img id="alt-header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
+            <p id="alt-motto">{motto}</p>
+            <br />
+            {/* <nav id="alt-nav">
+                <Link id="back-button" to="/">{'<-- Back Home'}</Link>
+            </nav> */}
         </div>
     );
 }
 
-class Header extends React.Component {
-    componentDidMount() {
-        initializeHeader(this.props.isHeaderDisappearing);
-    }
+const Header = props => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { subscribeToSessionValidation } = props;
 
-    getHeader(headerType, pageTitle, isAuthenticated) { //, userSession) {
+    useEffect(() => {
+        subscribeToSessionValidation();
+    }, [subscribeToSessionValidation]);
+
+    useEffect(() => {
+        initializeHeader(props.isHeaderDisappearing);
+    }, [props.isHeaderDisappearing]);
+
+    const getHeader = (headerType, pageTitle, isAuthenticated, isAdmin, isPseudoAdmin) => { //, userSession) {
         var header;
+        var sep;
         //const isAdmin = userSession.isAuthenticated && userSession.isAdmin;
     
         if (headerType === 'Normal') {
-            header = NormalHeader(pageTitle, isAuthenticated, this.props.logout)//, isAdmin);
+            // header = NormalHeader(pageTitle, isAuthenticated, props.logout)//, isAdmin);
+            header = <NormalHeader
+                        isMobileMenuOpen={isMobileMenuOpen}
+                        setIsMobileMenuOpen={setIsMobileMenuOpen}
+                        pageTitle={pageTitle}
+                        isAuthenticated={isAuthenticated}
+                        isAdmin={(isAdmin || isPseudoAdmin) && window.location.pathname === '/dashboard'}
+                        logout={props.logout}
+                    />;
+            sep = <p id="head-sep"></p>;
         }
         else if (headerType === 'Alt') {
             header = AltHeader();
+            sep = <p id="head-sep-alt"></p>;
         }
+
+        const permanentAdminFABActions = [];
+
+        if (window.location.pathname !== '/dashboard') {
+            permanentAdminFABActions.push({ name: 'Go to Dashboard', icon: <ConsoleIcon />, onClick: () => history.push('/dashboard') });
+        }
+        
+        permanentAdminFABActions.push({ name: 'Log Out', icon: <LogOutIcon />, onClick: () => props.logout() });
     
-        return header;
+        return (
+            <header>
+                <div id="header-container">
+                    {
+                        ((isAdmin || isPseudoAdmin))
+                        ?
+                            <Marquee
+                                marqueeText={(props.canEditMarqueeText) ? props.temp_marquee_text : props.marquee_text}
+                                setMarqueeText={props.setMarqueeText}
+                                updateMarqueeText={() => { alert('Updated!...well this is just a demo, so you can\'t actually change the text 😁, but this would update on your actual website 😃 (Note: Only a user with Admin access would be able to do this on the actual website.)'); window.location.reload(); }}
+                                isAdmin={(isAdmin || isPseudoAdmin) && window.location.pathname === '/dashboard'}
+                                isEditMode={props.canEditMarqueeText}
+                                toggleEditMode={props.toggleEditMarqueeText}
+                            />
+                        :
+                            <Marquee
+                                marqueeText={(props.canEditMarqueeText) ? props.temp_marquee_text : props.marquee_text}
+                                updateMarqueeText={() => { alert('Updated!...well this is just a demo, so you can\'t actually change the text 😁, but this would update on your actual website 😃 (Note: Only a user with Admin access would be able to do this on the actual website.)'); window.location.reload(); }}
+                                isAdmin={props.loggedIn}
+                            />
+                    }
+                    <br />
+                    {header}
+                </div>
+                {sep}
+                <div id="menu-transparent-film" hidden={true} onClick={() => setIsMobileMenuOpen(toggleMobileHeader())}></div>
+                <AdminSettingsFAB
+                    actions={
+                        [
+                            ...props.adminSettingsFABActionData.actions,
+                            ...permanentAdminFABActions
+                        ]
+                    }
+                    keepOpen={props.adminSettingsFABActionData.keepOpen}
+                />
+            </header>
+        );
     }
 
-    render() {
-        return this.getHeader(this.props.headerType, this.props.pageTitle, this.props.loggedIn)//, this.props.session.user);
-    }
+    return getHeader(props.headerType, props.pageTitle, props.loggedIn, props.isAdmin, props.isPseudoAdmin);//, props.session.user);
 }
 
 Header.propTypes = {
     headerType: PropTypes.oneOf(['Normal', 'Alt']),
     pageTitle: PropTypes.string,
     isHeaderDisappearing: PropTypes.bool,
+    adminSettingsFABActionData: PropTypes.shape({ actions: PropTypes.array, keepOpen: PropTypes.bool }),
 }
 
 Header.defaultProps = {
     headerType: 'Normal',
     pageTitle: 'Page Title',
     isHeaderDisappearing: false,
+    adminSettingsFABActionData: { actions: [], keepOpen: false },
 }
 
-const mapStateToProps = ({ session: { userId } }) => ({
-    loggedIn: Boolean(userId)
+const mapStateToProps = ({ session: { userId, isAdmin, isPseudoAdmin }, site_info: { marquee_text, temp_marquee_text, canEditMarqueeText } }) => ({
+    loggedIn: Boolean(userId),
+    isAdmin: Boolean(userId) && Boolean(isAdmin),
+    isPseudoAdmin: Boolean(userId) && Boolean(isPseudoAdmin),
+    marquee_text,
+    temp_marquee_text,
+    canEditMarqueeText
 });
 
 const mapDispatchToProps = dispatch => ({
-    logout: () => dispatch(logout())
+    subscribeToSessionValidation: () => dispatch(subscribeToSessionValidation()),
+    logout: () => dispatch(logout()),
+    setMarqueeText: marqueeText => dispatch(setMarqueeText(marqueeText)),
+    toggleEditMarqueeText: () => dispatch (toggleEditMarqueeText())
 });
 
 export default connect(

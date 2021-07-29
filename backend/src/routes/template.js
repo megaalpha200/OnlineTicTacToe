@@ -21,7 +21,7 @@ templateRoutesAPI.post('/send', async (req, res) => {
     addHeaders(req, res);
 
     await templateDAO.sendTestData(req.body);
-    res.status(200).send('OK').end();
+    res.status(200).send({ res: 'OK' }).end();
 });
 
 templateRoutesAPI.post('/retrieve', async (req, res) => {

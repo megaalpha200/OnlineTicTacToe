@@ -1,0 +1,16 @@
+#admin-settings-fab {
+    position: fixed;
+    bottom: 0.5rem;
+    left: 0.5rem;
+    z-index: 9989;
+}
+
+#admin-settings-fab .MuiSpeedDial-fab {
+    background-color: #ffd000;
+    color: #000000;
+}
+
+#admin-settings-fab .MuiSpeedDial-actions .MuiSpeedDialAction-staticTooltipLabel {
+    font-size: small;
+    width: 8rem;
+}

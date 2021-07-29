@@ -1,0 +1,575 @@
+---
+Parameters:
+  InstanceSSHKeyName:
+    Description: Instance Key Pair Name
+    Type: String
+    Default: hexipitemplate-key-new
+
+  InstanceClientTag:
+    Description: Instance Client Tag
+    Type: String
+    Default: HexiPi
+
+  DockerAuth:
+    Description: Docker Auth
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: DockerHubAuth
+
+Resources:
+  CodeDeployEC2Role:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+              - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - "arn:aws:iam::aws:policy/AmazonS3FullAccess"
+
+  CodeDeployEC2Profile: 
+    Type: "AWS::IAM::InstanceProfile"
+    Properties: 
+      Path: "/"
+      Roles: 
+        - 
+          Ref: "CodeDeployEC2Role"
+
+  TemplateInstance:
+    Type: AWS::EC2::Instance
+    DeletionPolicy: Delete
+    Properties:
+      AvailabilityZone: us-east-1a
+      ImageId : ami-04d29b6f966df1537
+      InstanceType : t2.micro
+      KeyName: !Ref InstanceSSHKeyName
+      IamInstanceProfile: !Ref CodeDeployEC2Profile
+      Tags:
+      - Key: Client
+        Value: !Ref InstanceClientTag
+      UserData: 
+        Fn::Base64: !Sub |
+          #!/bin/bash
+
+          dockerAuth=${DockerAuth}
+          awsRegion=${AWS::Region}
+
+          #Create Swap Partition
+          echo "### Creating Swap Partition..."
+          dd if=/dev/zero of=/swapfile count=2048 bs=1MiB
+          chmod 600 /swapfile
+          mkswap /swapfile
+          swapon /swapfile
+          echo "/swapfile swap swap sw 0 0" | tee -a /etc/fstab
+          echo
+
+          #Check for Package Updates
+          echo "### Checking for Package Updates..."
+          yum update -y && yum upgrade -y && yum clean packages
+          echo
+
+          echo "### Installing Docker, Git, Python 3, PIP, htop, Ruby, and Wget..."
+          yum install docker git python3 python3-pip htop ruby wget -y
+          echo
+
+          echo "### Installing CodeDeploy Agent..."
+          CODEDEPLOY_BIN="/opt/codedeploy-agent/bin/codedeploy-agent"
+          $CODEDEPLOY_BIN stop
+          yum erase codedeploy-agent -y
+
+          cd ~
+          wget https://aws-codedeploy-"$awsRegion".s3."$awsRegion".amazonaws.com/latest/install
+          chmod +x ./install
+          sudo ./install auto
+          sudo service codedeploy-agent start
+          echo
+
+          echo "### Installing Docker Compose..."
+          pip3 install docker-compose
+          echo
+
+          success=1
+
+          if [ -x "$(command -v git)" ]; then
+              echo "Git Installed Successfully!" >&2
+          else
+              echo "Error! Git could not install successfully!" >&2
+              success=-1
+          fi
+
+          if [ -x "$(command -v docker)" ]; then
+              echo "Docker Installed Successfully!" >&2
+          else
+              echo "Error! Docker could not install successfully!" >&2
+              success=-1
+          fi
+
+          if [ -x "$(command -v docker-compose)" ]; then
+              groupadd docker
+              usermod -aG docker ec2-user
+              #ADD CONFIG
+              systemctl start docker
+              systemctl enable docker
+              echo "Docker Compose Installed Successfully!" >&2
+          else
+              echo "Error! Docker Compose could not install successfully!" >&2
+              success=-1
+          fi
+
+          echo
+
+          if [ $success == 1 ]; then
+              echo "### Creating Project Folder..."
+              mkdir /home/ec2-user/app
+              chown ec2-user:ec2-user -R /home/ec2-user/app
+              echo 
+              echo "### Setting up Docker..."
+              mkdir /home/ec2-user/.docker
+              echo "{ \"auths\": { \"https://index.docker.io/v1/\": { \"auth\": \"$dockerAuth\" } } }" > /home/ec2-user/.docker/config.json
+              chown ec2-user:ec2-user -R /home/ec2-user/.docker
+              echo
+              echo
+              echo "Yay! Everything was successfully initialized!"
+              sudo reboot -h now
+          else
+              echo "Oh no! Something went horribly wrong!"
+          fi
+      SecurityGroups:
+        - !Ref ServerSecurityGroup
+
+  TemplateEIP:
+    Type: AWS::EC2::EIP
+    DeletionPolicy: Delete
+    Properties:
+      InstanceId: !Ref TemplateInstance
+
+  ServerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allows public web traffic and restricts SSH traffic to admin to the EC2 instance
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        Description: Frontend
+        FromPort: 80
+        ToPort: 80
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        Description: Frontend SSL
+        FromPort: 443
+        ToPort: 443
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        Description: Backend
+        FromPort: 8524
+        ToPort: 8524
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        Description: SSH for Admin
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 68.206.208.184/32
+
+  CodeBuild:
+    Type: 'AWS::CodeBuild::Project'
+    Properties:
+      Name: !Join ['-', [!Ref InstanceClientTag, 'CodeBuild']]
+      ServiceRole: !GetAtt CodeBuildRole.Arn
+      Artifacts:
+        # The downloaded source code for the build will come from CodePipeline
+        Type: CODEPIPELINE
+        Name: !Join ['-', [!Ref InstanceClientTag, 'CodePipeline']]
+      Environment:
+        # Linux container with node installed
+        ComputeType: BUILD_GENERAL1_SMALL
+        Type: LINUX_CONTAINER
+        Image: "aws/codebuild/standard:4.0"
+        PrivilegedMode: true
+      Source:
+        Type: CODEPIPELINE
+
+  CodeDeploy:
+    Type: AWS::CodeDeploy::Application
+    Properties: 
+      ApplicationName: !Join ['-', [!Ref InstanceClientTag, 'CodeDeploy']]
+      ComputePlatform: Server
+
+  CodeDeployDeploymentGroup:
+    Type: AWS::CodeDeploy::DeploymentGroup
+    Properties: 
+      ApplicationName: !Ref CodeDeploy
+      # Deployment:
+      #   IgnoreApplicationStopFailures: true
+      #   Revision:
+      #     RevisionType: S3
+      #     S3Location: 
+      #       Bucket:
+      #         Ref: Bucket
+      #       Key: 
+      #         Ref: Key
+      #       BundleType: Zip
+      #       ETag: 
+      #         Ref: ETag
+      #       Version: 
+      #         Ref: Version
+      Ec2TagFilters: 
+        - 
+          Key: Client
+          Value: !Ref InstanceClientTag
+          Type: "KEY_AND_VALUE"
+      ServiceRoleArn: !GetAtt CodeDeployRole.Arn
+
+  # IAM role that allows CodeBuild to interact with S3, CloudWatch, and CloudFront
+  CodeBuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service:
+                - "codebuild.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /service-role/
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:GetBucketVersioning"
+                  - "s3:PutObject"
+                Resource: 
+                  - !GetAtt PipelineBucket.Arn
+                  - !Join ['', [!GetAtt PipelineBucket.Arn, "/*"]]
+              -
+                Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                  - "cloudfront:CreateInvalidation"
+                Resource:
+                  - "*"
+        - PolicyName: SecretsManagerPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 
+                  - "secretsmanager:GetSecretValue"
+                Resource: !Join [":", ['arn:aws:secretsmanager', !Ref AWS::Region, !Ref AWS::AccountId, 'secret:*']]
+
+  # IAM role that allows CodeDeploy to interact with S3, CloudWatch, and CloudFront
+  CodeDeployRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service:
+                - "codedeploy.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Path: /service-role/
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSCodeDeployRole
+      # Policies:
+      #   - PolicyName: root
+      #     PolicyDocument:
+      #       Version: "2012-10-17"
+      #       Statement: 
+      #         - 
+      #           Effect: Allow
+      #           Action:
+      #             - "s3:GetObject"
+      #             - "s3:GetObjectVersion"
+      #             - "s3:GetBucketVersioning"
+      #             - "s3:PutObject"
+      #           Resource: 
+      #             - !GetAtt PipelineBucket.Arn
+      #             - !Join ['', [!GetAtt PipelineBucket.Arn, "/*"]]
+      #         # - 
+      #         #   Effect: Allow
+      #         #   Action:
+      #         #     - "s3:GetObject"
+      #         #     - "s3:GetObjectVersion"
+      #         #     - "s3:GetBucketVersioning"
+      #         #     - "s3:PutObject"
+      #         #     - "s3:PutObjectAcl"
+      #         #   Resource: 
+      #         #     - !GetAtt PipelineBucket.Arn
+      #         #     - !Join ['', [!GetAtt PipelineBucket.Arn, "/*"]]
+      #         -
+      #           Effect: Allow
+      #           Action:
+      #             - "logs:CreateLogGroup"
+      #             - "logs:CreateLogStream"
+      #             - "logs:PutLogEvents"
+      #             - "cloudfront:CreateInvalidation"
+      #           Resource:
+      #             - "*"
+
+  CodePipeline:
+    Type: 'AWS::CodePipeline::Pipeline'
+    Properties:
+      RoleArn: !GetAtt CodePipeLineRole.Arn
+      ArtifactStore:
+        Location: !Ref PipelineBucket
+        Type: S3
+      Stages:
+        - 
+          Name: Source
+          Actions: 
+            - 
+              Name: SourceAction
+              ActionTypeId: 
+                Category: Source
+                Owner: ThirdParty
+                Provider: GitHub
+                Version: 1
+              OutputArtifacts: 
+                - 
+                  Name: SourceArtifacts
+              Configuration:
+                Owner: dummy
+                Repo: dummy
+                Branch: master
+                OAuthToken: dummy
+
+              # Configuration:
+              #   Owner: "{{resolve:secretsmanager:GHAuth:SecretString:SourceRepoOwner}}"
+              #   Repo: "{{resolve:secretsmanager:GHAuth:SecretString:SourceRepoName}}"
+              #   Branch: master
+              #   OAuthToken: "{{resolve:secretsmanager:GHAuth:SecretString:GitHubPersonalAccessToken}}"
+        -
+          Name: Build
+          Actions: 
+            - 
+              Name: Approve_Build
+              RunOrder: 1
+              ActionTypeId: 
+                Category: Approval
+                Owner: AWS
+                Version: 1
+                Provider: Manual
+            - 
+              Name: Build_Docker_Images
+              RunOrder: 2
+              ActionTypeId: 
+                Category: Build
+                Owner: AWS
+                Version: 1
+                Provider: CodeBuild
+              InputArtifacts: 
+                - 
+                  Name: SourceArtifacts
+              OutputArtifacts: 
+                - 
+                  Name: BuildArtifacts
+              Configuration:
+                ProjectName: !Ref CodeBuild
+        -
+          Name: Deploy
+          Actions:
+            -
+              Name: Approve_Deploy
+              RunOrder: 1
+              ActionTypeId: 
+                Category: Approval
+                Owner: AWS
+                Version: 1
+                Provider: Manual
+            -
+              Name: Deploy_App
+              RunOrder: 2
+              ActionTypeId: 
+                Category: Deploy
+                Owner: AWS
+                Version: 1
+                Provider: CodeDeploy
+              InputArtifacts: 
+                - 
+                  Name: BuildArtifacts
+              Configuration:
+                ApplicationName: !Ref CodeDeploy
+                DeploymentGroupName: !Ref CodeDeployDeploymentGroup
+
+  # CodePipeline service role
+  CodePipeLineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - 
+            Effect: Allow
+            Principal:
+              Service:
+                - "codepipeline.amazonaws.com"
+            Action:
+              - "sts:AssumeRole"
+      Policies:
+        - PolicyName: root
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement: 
+              - 
+                Effect: Allow
+                Action:
+                  - "s3:GetObject"
+                  - "s3:GetObjectVersion"
+                  - "s3:GetBucketVersioning"
+                  - "s3:PutObject"
+                Resource: 
+                  - !GetAtt PipelineBucket.Arn
+                  - !Join ['', [!GetAtt PipelineBucket.Arn, "/*"]]
+              - 
+                Effect: Allow  
+                Action:
+                  - "codebuild:BatchGetBuilds"
+                  - "codebuild:StartBuild"
+                Resource: "*"
+        - PolicyName: CodePipelineServiceRole
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Action:
+                - iam:PassRole
+                Resource: "*"
+                Effect: Allow
+                Condition:
+                  StringEqualsIfExists:
+                    iam:PassedToService:
+                    - cloudformation.amazonaws.com
+                    - elasticbeanstalk.amazonaws.com
+                    - ec2.amazonaws.com
+                    - ecs-tasks.amazonaws.com
+              - Action:
+                - codecommit:CancelUploadArchive
+                - codecommit:GetBranch
+                - codecommit:GetCommit
+                - codecommit:GetRepository
+                - codecommit:GetUploadArchiveStatus
+                - codecommit:UploadArchive
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - codedeploy:CreateDeployment
+                - codedeploy:GetApplication
+                - codedeploy:GetApplicationRevision
+                - codedeploy:GetDeployment
+                - codedeploy:GetDeploymentConfig
+                - codedeploy:RegisterApplicationRevision
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - codestar-connections:UseConnection
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - elasticbeanstalk:*
+                - ec2:*
+                - elasticloadbalancing:*
+                - autoscaling:*
+                - cloudwatch:*
+                - s3:*
+                - sns:*
+                - cloudformation:*
+                - rds:*
+                - sqs:*
+                - ecs:*
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - lambda:InvokeFunction
+                - lambda:ListFunctions
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - opsworks:CreateDeployment
+                - opsworks:DescribeApps
+                - opsworks:DescribeCommands
+                - opsworks:DescribeDeployments
+                - opsworks:DescribeInstances
+                - opsworks:DescribeStacks
+                - opsworks:UpdateApp
+                - opsworks:UpdateStack
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - cloudformation:CreateStack
+                - cloudformation:DeleteStack
+                - cloudformation:DescribeStacks
+                - cloudformation:UpdateStack
+                - cloudformation:CreateChangeSet
+                - cloudformation:DeleteChangeSet
+                - cloudformation:DescribeChangeSet
+                - cloudformation:ExecuteChangeSet
+                - cloudformation:SetStackPolicy
+                - cloudformation:ValidateTemplate
+                Resource: "*"
+                Effect: Allow
+              - Action:
+                - codebuild:BatchGetBuilds
+                - codebuild:StartBuild
+                - codebuild:BatchGetBuildBatches
+                - codebuild:StartBuildBatch
+                Resource: "*"
+                Effect: Allow
+              - Effect: Allow
+                Action:
+                - devicefarm:ListProjects
+                - devicefarm:ListDevicePools
+                - devicefarm:GetRun
+                - devicefarm:GetUpload
+                - devicefarm:CreateUpload
+                - devicefarm:ScheduleRun
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - servicecatalog:ListProvisioningArtifacts
+                - servicecatalog:CreateProvisioningArtifact
+                - servicecatalog:DescribeProvisioningArtifact
+                - servicecatalog:DeleteProvisioningArtifact
+                - servicecatalog:UpdateProduct
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - cloudformation:ValidateTemplate
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - ecr:DescribeImages
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - states:DescribeExecution
+                - states:DescribeStateMachine
+                - states:StartExecution
+                Resource: "*"
+              - Effect: Allow
+                Action:
+                - appconfig:StartDeployment
+                - appconfig:StopDeployment
+                - appconfig:GetDeployment
+                Resource: "*"
+  # Temp bucket for storing build artifacts
+  PipelineBucket: 
+    Type: 'AWS::S3::Bucket'
+    Properties: {}

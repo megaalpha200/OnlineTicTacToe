@@ -14,7 +14,7 @@ export const _nullSession = {
     hasQuitGame: false,
 };
 
-export default (state = _nullSession, { type, gameData }) => {
+const gameReducer =  (state = _nullSession, { type, gameData }) => {
     Object.freeze(state);
     switch (type) {
         case INITIALIZE_GAME_DATA:
@@ -28,3 +28,5 @@ export default (state = _nullSession, { type, gameData }) => {
             return state;
     }
 };
+
+export default gameReducer;

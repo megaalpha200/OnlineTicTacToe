@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import { SHA256 } from 'crypto-js';
-import { hashSync } from 'bcryptjs';
+import { generateAuth } from '../util/helpers';
 
 const UserSchema = new mongoose.Schema({
     username: {
@@ -28,6 +27,9 @@ const UserSchema = new mongoose.Schema({
     auth: {
         type: String,
         required: true
+    },
+    user_type: {
+        type: String
     }
 }, { timestamps: true });
 
@@ -45,7 +47,7 @@ UserSchema.methods.comparePasswords = function (passwordHash) {
     var emailHash = this.email;
     var userSalt = this.salt;
     var retrievedAuthHash = this.auth;
-    var genAuthHash = hashSync(emailHash + passwordHash, `$2b$10$${SHA256(userSalt + emailHash + passwordHash).toString().slice(-22)}`).slice(-50);
+    var genAuthHash = generateAuth(emailHash, passwordHash, userSalt);
   
     //return compareSync(password, this.password);
     return retrievedAuthHash === genAuthHash;

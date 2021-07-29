@@ -12,5 +12,8 @@ export const {
     NODE_ENV,
     HOSTNAME_FOLDER_NAME,
     LOCAL_SSL,
-    CORS_WHITELIST
+    CORS_WHITELIST,
+    SMTP_HOST,
+    SMTP_USER,
+    SMTP_PASS
 } = process.env;

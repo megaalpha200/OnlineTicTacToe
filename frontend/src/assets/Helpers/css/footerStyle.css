@@ -71,8 +71,9 @@
 
 .footer-logo {
     /* height: 250px; */
-    width: 250px;
-    /* background-color: white; */
+    width: 375px;
+    /* background-color: #cc9900; */
+    background-color: #00000077;
     border-radius: 30px;
 }
 

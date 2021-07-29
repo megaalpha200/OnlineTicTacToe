@@ -1,4 +1,4 @@
-import * as apiUtil from 'util/game';
+import * as apiUtil from 'util/api/game';
 import { receiveErrors } from 'actions/error';
 import { parseError } from 'util/helpers';
 import { _nullSession } from 'reducers/game/game';

@@ -16,11 +16,14 @@ echo
 
 #Check for Package Updates
 echo "### Checking for Package Updates..."
-yum check-update && yum update -y && yum upgrade -y && yum clean packages
+yum update -y && yum upgrade -y && yum clean packages
 echo
 
 echo "### Installing Docker, Git, Python 3, PIP, and htop..."
-yum install docker git python3 python3-pip -y htop
+#NodeJS, Yarn..."
+# curl --silent --location https://rpm.nodesource.com/setup_12.x | bash 
+# curl -sL https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo
+yum install docker git python3 python3-pip htop -y #nodejs yarn -y
 echo
 
 echo "### Installing Docker Compose..."
@@ -53,6 +56,20 @@ else
     echo "Error! Docker Compose could not install successfully!" >&2
     success=-1
 fi
+
+# if [ -x "$(command -v node)" ]; then
+#     echo "NodeJS Installed Successfully!" >&2
+# else
+#     echo "Error! NodeJS could not install successfully!" >&2
+#     success=-1
+# fi
+
+# if [ -x "$(command -v yarn)" ]; then
+#     echo "Yarn Installed Successfully!" >&2
+# else
+#     echo "Error! Yarn could not install successfully!" >&2
+#     success=-1
+# fi
 
 echo
 
