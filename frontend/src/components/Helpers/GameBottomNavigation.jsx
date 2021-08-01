@@ -10,11 +10,11 @@ const useStyles = makeStyles({
     width: '100%',
     bottom: 0,
     position: 'fixed',
-    zIndex: 9990,
   },
   root: {
     width: '100%',
-    backgroundColor: '#333333'
+    backgroundColor: '#333333',
+    zIndex: 9990,
   },
   rootActionIcons: {
     color: '#CC3300',
