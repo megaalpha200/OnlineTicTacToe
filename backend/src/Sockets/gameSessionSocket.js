@@ -18,7 +18,7 @@ module.exports = async (io, client, database) => {
             }
             catch(e) {
                 console.log(e.message);
-                socket.emit('gameDataInitRes', { message: 'Could not initialize game data!', game: res });
+                socket.emit('gameDataInitRes', { message: 'Could not initialize game data!', game: {} });
             }
         });
 
@@ -30,7 +30,7 @@ module.exports = async (io, client, database) => {
             }
             catch(e) {
                 console.log(e.message);
-                socket.in(session_id).emit('gameDataUpdateRes', { message: 'Could not update game data!', game: res });
+                socket.in(session_id).emit('gameDataUpdateRes', { message: 'Could not update game data!', game: {} });
             }
         });
     });

@@ -42,6 +42,14 @@ export const cleanUpGameData = () => (
     })
 );
 
+export const clearAllGameSessions = () => (
+    fetch(`${APIEndpoint}/clear-game-sessions`, {
+        method: 'DELETE',
+        mode: 'cors',
+        credentials: 'include'
+    })
+);
+
 export const checkGameData = async () => {
     let preloadedState = {};
 

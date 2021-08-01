@@ -5,7 +5,7 @@ import hookRoutes from './hook';
 import { templateRoutes, templateDBComms } from './template';
 import { siteInfoRoutes, siteInfoDBComms } from './site_info';
 import { contactFormRoutes, contactFormDBComms } from './contact_form';
-import gameRoutes from './game';
+import { gameRoutes, gameDBComms } from './game';
 
 export default async (apiRouter, client, db) => {
     apiRouter.use('/', mainRoutes);
@@ -20,4 +20,5 @@ export default async (apiRouter, client, db) => {
     await templateDBComms(client, db);
     await siteInfoDBComms(client, db);
     await contactFormDBComms(client, db);
+    await gameDBComms(client, db);
 };

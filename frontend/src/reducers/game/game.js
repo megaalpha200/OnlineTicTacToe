@@ -1,7 +1,8 @@
 import {
     INITIALIZE_GAME_DATA,
     UPDATE_GAME_DATA,
-    CLEAR_GAME_DATA
+    CLEAR_GAME_DATA,
+    CLEAR_GAME_SESSIONS
 } from 'actions/game';
 
 export const _nullSession = { 
@@ -23,6 +24,7 @@ const gameReducer =  (state = _nullSession, { type, gameData }) => {
             gameData.assignedPlayer = state.assignedPlayer;
             return gameData;
         case CLEAR_GAME_DATA:
+        case CLEAR_GAME_SESSIONS:
             return _nullSession;
         default:
             return state;

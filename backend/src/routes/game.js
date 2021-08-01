@@ -1,14 +1,16 @@
 import express from 'express';
 import cors from 'cors';
-import { parseError, corsOptionsDelegate, addHeaders } from '../util/helpers';
+import { parseError, corsOptionsDelegate, addHeaders, isAdmin, checkIfAdmin, onRouteError } from '../util/helpers';
 import gameDAO from '../DAO/gameSessionDAO';
 import { SESSION_NAME } from '../config';
-
-export const gameDBComms = async (client, db) => await gameDAO.injectDB(client, db);
 
 const gameRouterAPI = express.Router();
 
 gameRouterAPI.options('', cors(corsOptionsDelegate), (req, res) => {
+    addHeaders(req, res);
+});
+
+gameRouterAPI.options('/clear-game-sessions', cors(corsOptionsDelegate), (req, res) => {
     addHeaders(req, res);
 });
 
@@ -75,7 +77,7 @@ gameRouterAPI.delete('', (req, res) => {
             session.destroy(err => {
                 if (err) throw (err);
                 res.clearCookie(SESSION_NAME);
-                res.send()
+                res.send();
             });
         }
     }
@@ -102,6 +104,29 @@ gameRouterAPI.get('', async (req, res) => {
     }
 });
 
-export default gameRouterAPI;
+gameRouterAPI.delete('/clear-game-sessions', (req, res) => {
+    addHeaders(req, res);
+
+    const session = req.session;
+
+    try {
+        checkIfAdmin(isAdmin(req));
+
+        const session_id = session.session_id;
+
+        gameDAO.clearGameSessions(isAdmin(req));
+
+        if (session_id) {
+            delete req.session.session_id;
+            delete req.session.assignedPlayer;
+        }
+
+        res.status(200).send('OK').end();
+    }
+    catch (err) {
+        onRouteError(res, err, 'ERROR');
+    }
+});
 
 export const gameRoutes = gameRouterAPI;
+export const gameDBComms = async (client, db) => await gameDAO.injectDB(client, db);

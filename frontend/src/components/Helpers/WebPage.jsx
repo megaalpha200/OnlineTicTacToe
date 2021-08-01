@@ -9,6 +9,7 @@ import 'assets/Helpers/css/mainStyle.css';
 import Header from 'components/Helpers/Header.jsx';
 import Footer from 'components/Helpers/Footer.jsx';
 import ScrollToTop from 'assets/Helpers/js/ScrollToTop';
+import GameBottomNavigation from 'components/Helpers/GameBottomNavigation.jsx';
 
 const checkIfHeadingIsNeeded = heading => {
   if (heading !== 'undefined') {
@@ -51,9 +52,10 @@ const WebPage = props => (
       <article>
         {checkIfHeadingIsNeeded(props.pageHeading)}
         {props.children}
+        {(props.showBottomNav) ? <p style={{ backgroundColor: 'transparent', marginBottom: '10em' }}></p> : ""}
         {/* <Fab id="scroll-to-top-fab" onClick={scroll}><UpIcon /></Fab> */}
       </article>
-      {(props.headerFooterShow) ? <Footer /> : ''}
+      {(props.showBottomNav) ? <GameBottomNavigation navActions={props.navActions} /> : (props.headerFooterShow) ? <Footer /> : ""}
   </div>
 );
 
@@ -66,6 +68,8 @@ WebPage.propTypes = {
   embeddedPageMode: PropTypes.bool,
   doesScrollToTop: PropTypes.bool,
   adminSettingsFABActionData: PropTypes.shape({ actions: PropTypes.array, keepOpen: PropTypes.bool }),
+  showBottomNav: PropTypes.bool,
+  navActions: PropTypes.shape({ label: PropTypes.string.isRequired, icon: PropTypes.object }).isRequired,
 };
 
 WebPage.defaultProps = {
@@ -77,6 +81,8 @@ WebPage.defaultProps = {
   embeddedPageMode: false,
   doesScrollToTop: true,
   adminSettingsFABActionData: { actions: [], keepOpen: false },
+  showBottomNav: false,
+  navActions: [],
 }
 
 export default WebPage;

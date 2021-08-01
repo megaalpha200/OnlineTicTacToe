@@ -1,4 +1,5 @@
 var mongo = require('mongodb');
+var checkIfAdmin = require('../util/helpers').checkIfAdmin;
 
 let db;
 let gameSessions;
@@ -54,7 +55,15 @@ module.exports = class gameSessionDAO {
         try {
             delete gameData.assignedPlayer;
             gameData.session_id = mongo.ObjectID(gameData.session_id);
-            await gameSessions.updateOne({ _id: mongo.ObjectID(session_id) }, { $set: gameData });
+
+            const existsRes = await gameSessions.findOne({ _id: mongo.ObjectID(session_id) });
+
+            if (existsRes && Object.keys(existsRes).length > 0) {
+                await gameSessions.updateOne({ _id: mongo.ObjectID(session_id) }, { $set: gameData });
+            }
+            else {
+                await gameSessions.insertOne({ _id: mongo.ObjectID(session_id), ...gameData });
+            }
 
             result = gameData;
         }
@@ -94,6 +103,25 @@ module.exports = class gameSessionDAO {
         catch(err) {
             console.error(
                 `Unable retrieve game data in gameSessionDAO: ${err}`
+            );
+            throw err;
+        }
+
+        return result;
+    }
+
+    static async clearGameSessions(isAdmin) {
+        let result = null;
+
+        try {
+            checkIfAdmin(isAdmin);
+
+            await gameSessions.deleteMany({});
+            result = 'OK';
+        }
+        catch(err) {
+            console.error(
+                `Unable to delete game sessions in gameSessionDAO: ${err}`
             );
             throw err;
         }

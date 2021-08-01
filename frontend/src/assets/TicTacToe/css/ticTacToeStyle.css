@@ -10,6 +10,11 @@
     justify-content: center;
 }
 
+.game-board {
+    margin: auto;
+    margin-top: 1rem;
+}
+
 .game-board > .game-row::after {
     clear: both;
     display: table;
@@ -45,22 +50,22 @@
 
 @media only screen and (max-width: 960px) {
     .game-square {
-        height: 7rem;
-        width: 7rem;
+        height: 8rem;
+        width: 8rem;
     }
 }
 
 @media only screen and (max-width: 800px) {
     .game-square {
         font-size: 4em;
-        height: 5rem;
-        width: 5rem;
+        height: 7rem;
+        width: 7rem;
     }
 }
 
 @media screen and (max-width: 540px) {
     .game-square {
-        height: 4rem;
-        width: 4rem;
+        height: 6rem;
+        width: 6rem;
     }
 }

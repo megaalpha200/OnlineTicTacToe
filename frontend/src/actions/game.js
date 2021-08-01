@@ -1,4 +1,5 @@
 import * as apiUtil from 'util/api/game';
+import { callAPI } from 'util/helpers';
 import { receiveErrors } from 'actions/error';
 import { parseError } from 'util/helpers';
 import { _nullSession } from 'reducers/game/game';
@@ -6,6 +7,7 @@ import { _nullSession } from 'reducers/game/game';
 export const INITIALIZE_GAME_DATA = 'INITIALIZE_GAME_DATA';
 export const UPDATE_GAME_DATA = 'UPDATE_GAME_DATA';
 export const CLEAR_GAME_DATA = 'CLEAR_GAME_DATA';
+export const CLEAR_GAME_SESSIONS = 'CLEAR_GAME_SESSIONS';
 
 const initializeGameData = gameData => ({
     type: INITIALIZE_GAME_DATA,
@@ -17,9 +19,12 @@ const updateGameData = gameData => ({
     gameData
 });
 
-const clearGameData = gameData => ({
-    type: CLEAR_GAME_DATA,
-    gameData
+const clearGameData = () => ({
+    type: CLEAR_GAME_DATA
+});
+
+const clearGameSessions = () => ({
+    type: CLEAR_GAME_SESSIONS,
 });
 
 const handleReceivedGameData = async (receivedGameData, dispatch, action, shouldAssignPlayer, shouldRefresh) => {
@@ -89,6 +94,22 @@ export const cleanUpData = () => async dispatch => {
     try {
         apiUtil.cleanUpGameData();
         return dispatch(clearGameData());
+    }
+    catch(err) {
+        return dispatch(receiveErrors(parseError(err)));
+    }
+};
+
+export const clearAllGameSessions = () => async dispatch => {
+    try {
+        const res = window.confirm('Are you sure you want to clear game all sessions?');
+
+        if (res) {
+            await callAPI(apiUtil.clearAllGameSessions(), 'Unable to clear game sessions!', (_) => {
+                alert('Game Sessions Cleared!');
+                return dispatch(clearGameSessions());
+            });
+        }
     }
     catch(err) {
         return dispatch(receiveErrors(parseError(err)));

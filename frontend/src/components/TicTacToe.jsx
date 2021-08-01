@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
+import React, { useEffect } from 'react';
 import { connect } from 'react-redux';
 import { initializeData, updateData, resetData, cleanUpData } from 'actions/game';
 import { currentLocation } from 'util/helpers';
+import { Share, Chat, ExitToApp as QuitIcon } from '@material-ui/icons';
 import WebPage from 'components/Helpers/WebPage.jsx';
 import 'assets/TicTacToe/css/ticTacToeStyle.css';
 
@@ -96,28 +97,32 @@ const GameBoard = (props) => {
     );
 }
 
-class TicTacToe extends Component {
-    componentDidMount = () => {
-        const hasQuitGame = this.checkIfGameQuit(this.props);
+const TicTacToe = props => {
+    useEffect(() => {
+        const hasQuitGame = checkIfGameQuit(props);
 
         if (!hasQuitGame) {
             const pathArr = window.location.pathname.split('/');
             const urlSessionID = pathArr[pathArr.length - 1];
-            let session_id = this.props.game.session_id;
+            let session_id = props.game.session_id;
 
             if (urlSessionID !== 'game') {
                 session_id = urlSessionID;
             }
 
-            this.props.initializeData(session_id, this.props.game.assignedPlayer);
+            props.initializeData(session_id, props.game.assignedPlayer);
         }
-    };
 
-    componentWillReceiveProps = (props) => {
-        this.checkIfGameQuit(props);
-    }
+        // eslint-disable-next-line
+    }, []);
 
-    checkIfGameQuit = (props) => {
+    useEffect(() => {
+        checkIfGameQuit(props);
+
+    // eslint-disable-next-line
+    }, [props.game.hasQuitGame]);
+
+    const checkIfGameQuit = (props) => {
         let hasQuitGame = false;
 
         if (props.game.hasQuitGame) {
@@ -129,71 +134,74 @@ class TicTacToe extends Component {
         return hasQuitGame;
     }
 
-    onSquareClicked = (player, index) => {
-        const squares = this.props.game.game_board.slice();
+    const quitGame = () => {
+        const res = window.confirm('Are you sure you want to quit the game?');
+
+        if (res) {
+            props.updateData({ ...props.game, hasQuitGame: true});
+        }
+    }
+
+    const onSquareClicked = (player, index) => {
+        const squares = props.game.game_board.slice();
         let isBoardFull = false;
 
-        if (this.props.game.winningPlayer || player !== this.props.game.currPlayerTurn || this.props.game.isDraw || squares[index]) {
+        if (props.game.winningPlayer || player !== props.game.currPlayerTurn || props.game.isDraw || squares[index]) {
             return;
         }
 
-        squares[index] = (this.props.game.currPlayerTurn === 1) ? 'X' : 'O';
+        squares[index] = (props.game.currPlayerTurn === 1) ? 'X' : 'O';
         const calculateWinnerData = calculateWinner(squares);
         if (calculateWinnerData.winner === null) isBoardFull = checkIfBoardFull(squares);
 
         const gameData = {
-            ...this.props.game,
+            ...props.game,
             game_board: squares,
-            currPlayerTurn: (this.props.game.currPlayerTurn === 1) ? 2 : 1,
+            currPlayerTurn: (props.game.currPlayerTurn === 1) ? 2 : 1,
             winningLine: calculateWinnerData.winningLine,
             winningPlayer: calculateWinnerData.winner,
             isDraw: isBoardFull,
         };
 
-        this.props.updateData(gameData);
+        props.updateData(gameData);
     }
 
-    render() {
-        return (
-            <WebPage pageTitle="Tic Tac Toe" headerType="Alt">
-                <button onClick={() => this.props.updateData({ ...this.props.game, hasQuitGame: true})}>Quit</button>
-                <section className="game">
-                    <GameBoard
-                        assignedPlayer={this.props.game.assignedPlayer}
-                        currPlayerTurn={this.props.game.currPlayerTurn}
-                        squareData={this.props.game.game_board}
-                        winningLine={this.props.game.winningLine}
-                        isDraw={this.props.game.isDraw}
-                        onSquareClicked={this.onSquareClicked}
-                    />
-                    {
-                        (this.props.game.assignedPlayer === 1)
-                        ?
-                            <>
-                                <br />
-                                <h6 style={{ wordWrap: 'break-word' }}><u>Send this link to your friend to start playing:</u><br /><strong>{`${currentLocation}/game/${this.props.game.session_id}`}</strong></h6>
-                            </>
-                        :
-                            ""
-                    }
-                </section>
-                <br />
-                {
-                    (this.props.game.winningPlayer || this.props.game.isDraw)
-                    ?
-                        <>
-                            <p><u>Winner:</u> <strong>{(this.props.game.isDraw) ? 'It\'s a Draw!' : `Player ${this.props.game.winningPlayer}`}</strong></p>
-                            <br />
-                            <button onClick={() => this.props.resetData(this.props.game.session_id)}>Reset</button>
-                        </>
-                    :
-                        <></>
-                }
-                <br />
-                <span style={{ wordWrap: 'break-word' }}>{JSON.stringify(this.props.game)}</span>
-            </WebPage>
-        );
-    }
+    const shareNavAction = {label: 'Play With Friend', icon: <Share />, isShare: true, shareUrl: `${currentLocation}/game/${props.game.session_id}`, noHighlight: true};
+    const navActions = [
+        {label: 'Chat', icon: <Chat />, onClick: () => alert('This feature has yet to be implemented!'), noHighlight: true},
+        {label: 'Quit', icon: <QuitIcon />, onClick: () => quitGame(), noHighlight: true}
+    ];
+    
+    if (props.game.assignedPlayer === 1) navActions.unshift(shareNavAction);
+
+    return (
+        <WebPage pageTitle="Tic Tac Toe" headerType="Alt" showBottomNav navActions={navActions}>
+            <section className="game">
+                <GameBoard
+                    assignedPlayer={props.game.assignedPlayer}
+                    currPlayerTurn={props.game.currPlayerTurn}
+                    squareData={props.game.game_board}
+                    winningLine={props.game.winningLine}
+                    isDraw={props.game.isDraw}
+                    onSquareClicked={onSquareClicked}
+                />
+            </section>
+            <br />
+            {
+                (props.game.winningPlayer || props.game.isDraw)
+                ?
+                    <>
+                        <p><u>Winner:</u> <strong>{(props.game.isDraw) ? 'It\'s a Draw!' : `Player ${props.game.winningPlayer}`}</strong></p>
+                        <br />
+                        <button onClick={() => props.resetData(props.game.session_id)}>Reset</button>
+                    </>
+                :
+                    <></>
+            }
+            <br />
+            <span style={{ wordWrap: 'break-word' }}>{JSON.stringify(props.game)}</span>
+        </WebPage>
+    );
 }
 
 const mapStateToProps = ({ game }) => ({

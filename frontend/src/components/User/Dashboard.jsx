@@ -3,6 +3,7 @@ import { connect } from 'react-redux';
 import history from 'util/history';
 import { toggleEditMarqueeText, updateMarqueeText, clearMarqueeText, updateLastUpdateDate } from 'actions/site_info';
 import { clearAllSessions } from 'actions/session';
+import { clearAllGameSessions } from 'actions/game';
 import { Badge, Button } from '@material-ui/core';
 import { Edit as EditIcon, Close as CloseIcon, ClearAll as ClearIcon, Send as UpdateTextIcon, PersonAdd as NewUserIcon, DeleteSweep, AccountCircle as AccountIcon, Update as UpdateTimeIcon } from '@material-ui/icons';
 import Console from 'components/User/Console.jsx';
@@ -21,6 +22,7 @@ const mapDispatchToProps = dispatch => ({
     updateLastUpdateDate: () => dispatch(updateLastUpdateDate()),
     clearMarqueeText: () => dispatch(clearMarqueeText()),
     updateMarqueeText: () => dispatch(updateMarqueeText()),
+    clearAllGameSessions: () => dispatch(clearAllGameSessions()),
     clearAllSessions: () => dispatch(clearAllSessions())
 });
 
@@ -44,6 +46,7 @@ const Dashboard  = props => {
                         { name: 'Set Last Update Timestamp', icon: <UpdateTimeIcon />, onClick: () => props.updateLastUpdateDate() },
                         { name: 'Update My Account Details', icon: <AccountIcon />, onClick: () => setIsAccountDetailsModalOpen(true) },
                         { name: 'Add New User', icon: <NewUserIcon />, onClick: () => history.push('/signup-new-user'), adminOnly: true },
+                        { name: 'Clear All Game Sessions', icon: <DeleteSweep />, onClick: () => props.clearAllGameSessions(), adminOnly: true },
                         { name: 'Clear User Sessions', icon: <DeleteSweep />, onClick: () => props.clearAllSessions(), adminOnly: true }
                     ],
                     keepOpen: false
