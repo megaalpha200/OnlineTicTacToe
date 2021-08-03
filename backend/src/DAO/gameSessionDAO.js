@@ -26,13 +26,12 @@ module.exports = class gameSessionDAO {
         try {
             if (!session_id) {
                 await gameSessions.insertOne(gameData);
-                await gameSessions.updateOne({ _id: mongo.ObjectID(gameData._id) }, { $set: { session_id: gameData._id } });
 
                 if (!gameData.assignedPlayer) {
                     result.assignedPlayer = 1;
                 }
 
-                result.session_id = gameData._id;
+                result._id = gameData._id;
             }
             else {
                 result = await gameSessions.findOne({ _id: mongo.ObjectID(session_id) });
@@ -54,12 +53,18 @@ module.exports = class gameSessionDAO {
 
         try {
             delete gameData.assignedPlayer;
-            gameData.session_id = mongo.ObjectID(gameData.session_id);
+            delete gameData.hasPlayerJoined;
+
+            const updatedGameData = {
+                ...gameData
+            };
+
+            delete updatedGameData._id;
 
             const existsRes = await gameSessions.findOne({ _id: mongo.ObjectID(session_id) });
 
             if (existsRes && Object.keys(existsRes).length > 0) {
-                await gameSessions.updateOne({ _id: mongo.ObjectID(session_id) }, { $set: gameData });
+                await gameSessions.updateOne({ _id: mongo.ObjectID(session_id) }, { $set: updatedGameData });
             }
             else {
                 await gameSessions.insertOne({ _id: mongo.ObjectID(session_id), ...gameData });

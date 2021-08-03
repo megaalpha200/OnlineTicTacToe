@@ -55,7 +55,7 @@ const WebPage = props => (
         {(props.showBottomNav) ? <p style={{ backgroundColor: 'transparent', marginBottom: '10em' }}></p> : ""}
         {/* <Fab id="scroll-to-top-fab" onClick={scroll}><UpIcon /></Fab> */}
       </article>
-      {(props.showBottomNav) ? <GameBottomNavigation navActions={props.navActions} /> : (props.headerFooterShow) ? <Footer /> : ""}
+      {(props.showBottomNav) ? <GameBottomNavigation navActions={props.bottomNavData.navActions} /> : (props.headerFooterShow) ? <Footer /> : ""}
   </div>
 );
 
@@ -69,7 +69,7 @@ WebPage.propTypes = {
   doesScrollToTop: PropTypes.bool,
   adminSettingsFABActionData: PropTypes.shape({ actions: PropTypes.array, keepOpen: PropTypes.bool }),
   showBottomNav: PropTypes.bool,
-  navActions: PropTypes.shape({ label: PropTypes.string.isRequired, icon: PropTypes.object }).isRequired,
+  navActions: PropTypes.shape({ navActions: PropTypes.array.isRequired }).isRequired,
 };
 
 WebPage.defaultProps = {
@@ -82,7 +82,7 @@ WebPage.defaultProps = {
   doesScrollToTop: true,
   adminSettingsFABActionData: { actions: [], keepOpen: false },
   showBottomNav: false,
-  navActions: [],
+  bottomNavData: { navActions: [] },
 }
 
 export default WebPage;

@@ -8,18 +8,20 @@ export const initialize = (data, callback) => {
     const socket = SocketIOClient(socketEndpoint);
 
     socket.on('gameDataInitRes', callback);
-    socket.emit('gameDataInitReq', data.session_id, data);
+    socket.emit('gameDataInitReq', data._id, data);
 }
 
 export const update = (data) => {
     const socket = SocketIOClient(socketEndpoint);
-    socket.emit('gameDataUpdateReq', data.session_id, data);
+    socket.emit('gameDataUpdateReq', data._id, data);
 }
 
-export const initializeUpdateSocket = (session_id, callback) => {
+export const initializeUpdateSocket = (session_id, assignedPlayer, callback) => {
     const socket = SocketIOClient(socketEndpoint);
     socket.on('gameDataUpdateRes', callback);
     socket.emit('room', session_id);
+    
+    if (assignedPlayer) socket.emit('gameDataRejoinReq', session_id, assignedPlayer);
 }
 
 export const persistGameSession = data => (
@@ -62,7 +64,6 @@ export const checkGameData = async () => {
 
     try {
         if (gameData) {
-            delete gameData._id;
             preloadedState = {
                 game: gameData
             };

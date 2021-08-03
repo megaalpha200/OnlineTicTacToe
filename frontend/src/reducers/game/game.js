@@ -5,10 +5,10 @@ import {
     CLEAR_GAME_SESSIONS
 } from 'actions/game';
 
-export const _nullSession = { 
+export const _nullSession = {
+    _id: null,
     game_board: Array(9).fill(null),
     currPlayerTurn: 1,
-    session_id: null,
     winningPlayer: null,
     winningLine: null,
     isDraw: false,

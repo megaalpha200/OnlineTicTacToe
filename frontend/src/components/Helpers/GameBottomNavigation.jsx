@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { makeStyles } from '@material-ui/core/styles';
 import BottomNavigation from '@material-ui/core/BottomNavigation';
@@ -28,6 +28,10 @@ const GameBottomNavigation = props => {
     const classes = useStyles();
     const [bottomNavVal, setBottomNavVal] = useState(-1);
 
+    useEffect(() => {
+      setBottomNavVal(-1);
+    }, [props.navActions]);
+
     const renderNavActions = navActions => {
       var renderedNavActions = [];
 
@@ -37,6 +41,8 @@ const GameBottomNavigation = props => {
 
           if (action.noHighlight) setBottomNavVal(-1);
         }
+
+        if (action.isSelected && bottomNavVal !== index && bottomNavVal === -1) setBottomNavVal(index);
 
         const renderedNavAction = (
           <BottomNavigationAction

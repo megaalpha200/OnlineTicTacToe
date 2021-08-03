@@ -31,15 +31,14 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
     if (receivedGameData && receivedGameData.game && !receivedGameData.message) {
         const gameData = receivedGameData.game;
         const sessionData = {
-            session_id: gameData.session_id
+            session_id: gameData._id
         };
 
         if (shouldAssignPlayer) sessionData.assignedPlayer = gameData.assignedPlayer;
 
         await apiUtil.persistGameSession(sessionData);
-        if (shouldRefresh) dispatch(initializeData(gameData.session_id, gameData.assignedPlayer));
+        if (shouldRefresh) dispatch(initializeData(gameData._id, gameData.assignedPlayer));
 
-        delete gameData._id;
         return dispatch(action(gameData));
     }
 
@@ -48,19 +47,25 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
     return dispatch(receiveErrors(parseError(receivedGameData)));
 }
 
-export const initializeData = (session_id, hasAssignedPlayer) => async dispatch => {
-    try {
-        if (session_id !== null) apiUtil.initializeUpdateSocket(session_id, updateData => handleReceivedGameData(updateData, dispatch, updateGameData));
+const initUpdateSocket = (session_id, assignedPlayer, dispatch) => apiUtil.initializeUpdateSocket(session_id, assignedPlayer, updateData => handleReceivedGameData(updateData, dispatch, updateGameData));
 
-        if (hasAssignedPlayer && session_id) return;
+export const initializeData = (session_id, assignedPlayer) => async dispatch => {
+    try {
+        if (assignedPlayer && session_id) {
+            initUpdateSocket(session_id, assignedPlayer, dispatch);
+            return;
+        }
 
         let initData = {..._nullSession};
 
         if (session_id) { // Only if a second player is joining
-            initData.session_id = session_id;
+            initData._id = session_id;
         }
 
-        apiUtil.initialize(initData, (data) => handleReceivedGameData(data, dispatch, initializeGameData, true, session_id === null));
+        apiUtil.initialize(initData, async data => {
+            await handleReceivedGameData(data, dispatch, initializeGameData, true, session_id === null);
+            initUpdateSocket(session_id, false, dispatch);
+        });
     }
     catch(err) {
         return dispatch(receiveErrors(parseError(err)));
@@ -82,7 +87,7 @@ export const resetData = session_id => async dispatch => {
             ..._nullSession
         };
 
-        game.session_id = session_id;
+        game._id = session_id;
         apiUtil.update(game);
     }
     catch(err) {

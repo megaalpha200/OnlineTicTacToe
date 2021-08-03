@@ -1,8 +1,9 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { initializeData, updateData, resetData, cleanUpData } from 'actions/game';
 import { currentLocation } from 'util/helpers';
-import { Share, Chat, ExitToApp as QuitIcon } from '@material-ui/icons';
+import { Share, Chat, ExitToApp as QuitIcon, Refresh, SportsEsports as GameIcon } from '@material-ui/icons';
+import ReactSnackbar from 'react-js-snackbar';
 import WebPage from 'components/Helpers/WebPage.jsx';
 import 'assets/TicTacToe/css/ticTacToeStyle.css';
 
@@ -98,13 +99,16 @@ const GameBoard = (props) => {
 }
 
 const TicTacToe = props => {
+    const [isSnackbarShowing, setIsSnackbarShowing] = useState(false);
+    const [hasPlayerJoinedFirstTime, setHasPlayerJoinedFirstTime] = useState(false);
+
     useEffect(() => {
         const hasQuitGame = checkIfGameQuit(props);
 
         if (!hasQuitGame) {
             const pathArr = window.location.pathname.split('/');
             const urlSessionID = pathArr[pathArr.length - 1];
-            let session_id = props.game.session_id;
+            let session_id = props.game._id;
 
             if (urlSessionID !== 'game') {
                 session_id = urlSessionID;
@@ -117,10 +121,32 @@ const TicTacToe = props => {
     }, []);
 
     useEffect(() => {
+        setHasPlayerJoinedFirstTime(props.game.hasPlayerJoined);
+
+    // eslint-disable-next-line
+    }, [props.game.hasPlayerJoined]);
+
+    useEffect(() => {
         checkIfGameQuit(props);
 
     // eslint-disable-next-line
     }, [props.game.hasQuitGame]);
+
+    useEffect(() => {
+        const showSnackbar = () => {
+            if (isSnackbarShowing) return;
+    
+            setIsSnackbarShowing(true);
+            setTimeout(() => {
+                setIsSnackbarShowing(false);
+            }, 2000);
+        }
+
+        // if (props.game.hasPlayerJoined !== undefined && props.game.hasPlayerJoined !== props.game.assignedPlayer) showSnackbar();
+        if (props.game.hasPlayerJoined !== undefined) showSnackbar();
+        
+        // eslint-disable-next-line
+    },[props.game.hasPlayerJoined, props.game.assignedPlayer]);
 
     const checkIfGameQuit = (props) => {
         let hasQuitGame = false;
@@ -163,20 +189,29 @@ const TicTacToe = props => {
             isDraw: isBoardFull,
         };
 
+        delete gameData.hasPlayerJoined;
+
         props.updateData(gameData);
     }
 
-    const shareNavAction = {label: 'Play With Friend', icon: <Share />, isShare: true, shareUrl: `${currentLocation}/game/${props.game.session_id}`, noHighlight: true};
-    const navActions = [
-        {label: 'Chat', icon: <Chat />, onClick: () => alert('This feature has yet to be implemented!'), noHighlight: true},
-        {label: 'Quit', icon: <QuitIcon />, onClick: () => quitGame(), noHighlight: true}
-    ];
+    const shareNavAction = {label: 'Play With Friend', icon: <Share />, isShare: true, shareUrl: `${currentLocation}/game/${props.game._id}`, noHighlight: true};
+    const resetGameAction = {label: 'Reset', icon: <Refresh />, onClick: () => props.resetData(props.game._id), noHighlight: true, isSelected: true};
+    const bottomNavData = {
+        navActions: [
+            {label: 'Chat', icon: <Chat />, onClick: () => alert('This feature is not yet implemented!'), noHighlight: true},
+            // {label: 'Reset', icon: <Refresh />, onClick: () => props.resetData(props.game._id), noHighlight: true},
+            {label: 'Quit', icon: <QuitIcon />, onClick: () => quitGame(), noHighlight: true}
+        ]
+    };
     
-    if (props.game.assignedPlayer === 1) navActions.unshift(shareNavAction);
+    if (props.game.assignedPlayer === 1 && !hasPlayerJoinedFirstTime) bottomNavData.navActions.unshift(shareNavAction);
+    if (props.game.winningPlayer || props.game.isDraw) bottomNavData.navActions.unshift(resetGameAction);
 
     return (
-        <WebPage pageTitle="Tic Tac Toe" headerType="Alt" showBottomNav navActions={navActions}>
+        <WebPage pageTitle="Tic Tac Toe" headerType="Alt" showBottomNav bottomNavData={bottomNavData}>
             <section className="game">
+                <p>Player {props.game.currPlayerTurn}'s Turn!</p>
+                <br />
                 <GameBoard
                     assignedPlayer={props.game.assignedPlayer}
                     currPlayerTurn={props.game.currPlayerTurn}
@@ -193,13 +228,17 @@ const TicTacToe = props => {
                     <>
                         <p><u>Winner:</u> <strong>{(props.game.isDraw) ? 'It\'s a Draw!' : `Player ${props.game.winningPlayer}`}</strong></p>
                         <br />
-                        <button onClick={() => props.resetData(props.game.session_id)}>Reset</button>
+                        {/* <button onClick={() => props.resetData(props.game._id)}>Reset</button> */}
                     </>
                 :
                     <></>
             }
             <br />
             <span style={{ wordWrap: 'break-word' }}>{JSON.stringify(props.game)}</span>
+
+            <ReactSnackbar Icon={<GameIcon />} Show={isSnackbarShowing}>
+                Player {props.game.hasPlayerJoined} has joined!
+            </ReactSnackbar>
         </WebPage>
     );
 }
