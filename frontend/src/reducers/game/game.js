@@ -13,6 +13,7 @@ export const _nullSession = {
     winningLine: null,
     isDraw: false,
     hasQuitGame: false,
+    hasP2Joined: false,
 };
 
 const gameReducer =  (state = _nullSession, { type, gameData }) => {

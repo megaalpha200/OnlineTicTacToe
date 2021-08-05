@@ -27,7 +27,7 @@ const clearGameSessions = () => ({
     type: CLEAR_GAME_SESSIONS,
 });
 
-const handleReceivedGameData = async (receivedGameData, dispatch, action, shouldAssignPlayer, shouldRefresh) => {
+const handleReceivedGameData = async (receivedGameData, dispatch, action, shouldAssignPlayer) => {
     if (receivedGameData && receivedGameData.game && !receivedGameData.message) {
         const gameData = receivedGameData.game;
         const sessionData = {
@@ -37,7 +37,6 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
         if (shouldAssignPlayer) sessionData.assignedPlayer = gameData.assignedPlayer;
 
         await apiUtil.persistGameSession(sessionData);
-        if (shouldRefresh) dispatch(initializeData(gameData._id, gameData.assignedPlayer));
 
         return dispatch(action(gameData));
     }
@@ -63,8 +62,8 @@ export const initializeData = (session_id, assignedPlayer) => async dispatch => 
         }
 
         apiUtil.initialize(initData, async data => {
-            await handleReceivedGameData(data, dispatch, initializeGameData, true, session_id === null);
-            initUpdateSocket(session_id, false, dispatch);
+            await handleReceivedGameData(data, dispatch, initializeGameData, true);
+            initUpdateSocket(data.game._id, false, dispatch);
         });
     }
     catch(err) {

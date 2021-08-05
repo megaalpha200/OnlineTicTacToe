@@ -64,7 +64,7 @@ module.exports = class gameSessionDAO {
             const existsRes = await gameSessions.findOne({ _id: mongo.ObjectID(session_id) });
 
             if (existsRes && Object.keys(existsRes).length > 0) {
-                await gameSessions.updateOne({ _id: mongo.ObjectID(session_id) }, { $set: updatedGameData });
+                await gameSessions.updateOne({ _id: mongo.ObjectID(session_id) }, { $set: { ...updatedGameData } });
             }
             else {
                 await gameSessions.insertOne({ _id: mongo.ObjectID(session_id), ...gameData });

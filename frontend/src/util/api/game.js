@@ -21,7 +21,7 @@ export const initializeUpdateSocket = (session_id, assignedPlayer, callback) => 
     socket.on('gameDataUpdateRes', callback);
     socket.emit('room', session_id);
     
-    if (assignedPlayer) socket.emit('gameDataRejoinReq', session_id, assignedPlayer);
+    if (session_id && assignedPlayer) socket.emit('gameDataRejoinReq', session_id, assignedPlayer);
 }
 
 export const persistGameSession = data => (

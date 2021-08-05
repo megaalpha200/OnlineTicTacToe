@@ -30,7 +30,13 @@ const shouldUseLocalSSLCerts = LOCAL_SSL === 'true';
 
         const MongoClient = mongo.MongoClient;
         const server = (shouldUseLocalSSLCerts) ? https.createServer(options, app) : http.createServer(app);
-        const io = SocketIO(server);
+        const io = SocketIO(server, {
+            cors: {
+                origin: true,
+                methods: ["GET", "POST"],
+                credentials: true
+            }
+        });
 
         await mongoose.connect(MONGODB_URI, { useNewUrlParser: true, useUnifiedTopology: true });
         console.log('MongoDB connected');

@@ -13,9 +13,20 @@ module.exports = async (io, client, database) => {
         socket.on('gameDataInitReq', async (session_id, gameData) => {
             try {
                 const res = await gameSessionDAO.initializeGameData(session_id, gameData);
+
+                const resGameData = {
+                    ...res,
+                    hasPlayerJoined: res.assignedPlayer
+                }
+
+                if (res.assignedPlayer === 2) {
+                    await gameSessionDAO.updateGameData(session_id, { hasP2Joined: true });
+                    resGameData.hasP2Joined = true;
+                }
+
                 console.log('Game Data Initialized on MongoDB!');
                 socket.emit('gameDataInitRes', { game: res });
-                socket.to(session_id).emit('gameDataUpdateRes', { game: { ...res, hasPlayerJoined: res.assignedPlayer } });
+                socket.to(session_id).emit('gameDataUpdateRes', { game: resGameData });
             }
             catch(e) {
                 console.log(e.message);
@@ -40,6 +51,7 @@ module.exports = async (io, client, database) => {
                 const res = await gameSessionDAO.retrieveGameData(session_id);
                 console.log('Game Data Retrieved from MongoDB!');
                 socket.to(session_id).emit('gameDataUpdateRes', { game: { ...res, hasPlayerJoined: assignedPlayer } });
+                socket.emit('gameDataUpdateRes', { game: { ...res, hasPlayerJoined: assignedPlayer } });
             }
             catch(e) {
                 console.log(e.message);
