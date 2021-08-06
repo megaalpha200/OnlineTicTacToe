@@ -6,6 +6,7 @@
   "module": "./src/server.js",
   "scripts": {
     "start": "nodemon ./src/index.js",
+    "restart": "touch ./src/index.js",
     "dev": "nodemon ./src/index.js"
   },
   "keywords": [],

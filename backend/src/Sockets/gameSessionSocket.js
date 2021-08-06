@@ -20,7 +20,13 @@ module.exports = async (io, client, database) => {
                 }
 
                 if (res.assignedPlayer === 2) {
-                    await gameSessionDAO.updateGameData(session_id, { hasP2Joined: true });
+                    const updateData = {
+                        ...res,
+                        hasP2Joined: true
+                    };
+                    delete updateData.hasPlayerJoined;
+
+                    await gameSessionDAO.updateGameData(session_id, updateData);
                     resGameData.hasP2Joined = true;
                 }
 

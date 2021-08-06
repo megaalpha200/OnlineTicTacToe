@@ -105,15 +105,26 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
 
     const initializeGame = useCallback(() => {
         const pathArr = window.location.pathname.split('/');
-            const urlSessionID = pathArr[pathArr.length - 1];
-            let session_id = game._id;
+        const urlSessionID = pathArr[pathArr.length - 1];
+        let session_id = game._id;
 
-            if (urlSessionID !== 'game') {
-                session_id = urlSessionID;
-            }
+        if (urlSessionID !== 'game') {
+            session_id = urlSessionID;
+        }
 
-            initializeData(session_id, game.assignedPlayer);
-    }, [game._id, game.assignedPlayer, initializeData]);
+        if (!game.hasQuitGame) initializeData(session_id, game.assignedPlayer);
+    }, [game._id, game.assignedPlayer, game.hasQuitGame, initializeData]);
+
+    const updateGameData = useCallback(data => {
+        const gameData = {
+            ...game,
+            ...data
+        };
+
+        delete gameData.hasPlayerJoined;
+
+        updateData(gameData);
+    }, [updateData, game]);
 
     const checkIfGameQuit = useCallback((hasQuitGame) => {
         if (hasQuitGame) {
@@ -141,8 +152,9 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
         setIsSnackbarShowing(true);
         setTimeout(() => {
             setIsSnackbarShowing(false);
+            if (!game.hasQuitGame) updateGameData({ hasP2Joined: game.hasP2Joined });
         }, 2000);
-    }, [game.assignedPlayer, game.hasP2Joined]);
+    }, [game.assignedPlayer, game.hasP2Joined, game.hasQuitGame, updateGameData]);
 
     useEffect(() => {
         const hasQuitGame = checkIfGameQuit(game.hasQuitGame);
@@ -162,7 +174,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
         const res = window.confirm('Are you sure you want to quit the game?');
 
         if (res) {
-            updateData({ ...game, hasQuitGame: true});
+            updateGameData({ hasQuitGame: true });
         }
     }
 
@@ -179,7 +191,6 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
         if (calculateWinnerData.winner === null) isBoardFull = checkIfBoardFull(squares);
 
         const gameData = {
-            ...game,
             game_board: squares,
             currPlayerTurn: (game.currPlayerTurn === 1) ? 2 : 1,
             winningLine: calculateWinnerData.winningLine,
@@ -187,9 +198,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
             isDraw: isBoardFull,
         };
 
-        delete gameData.hasPlayerJoined;
-
-        updateData(gameData);
+        updateGameData(gameData);
     }
 
     const shareNavAction = {label: 'Share', icon: <Share />, isShare: true, shareUrl: `${currentLocation}/game/${game._id}`, noHighlight: true};
@@ -201,7 +210,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
             {label: 'Quit', icon: <QuitIcon />, onClick: () => quitGame(), noHighlight: true}
         ]
     };
-    
+
     if (game.assignedPlayer === 1 && !hasPlayerJoinedFirstTime) bottomNavData.navActions.unshift(shareNavAction);
     if (game.winningPlayer || game.isDraw) bottomNavData.navActions.unshift(resetGameAction);
 
