@@ -103,7 +103,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
     const [snackbarMsg, setSnackbarMsg] = useState('');
     const [hasPlayerJoinedFirstTime, setHasPlayerJoinedFirstTime] = useState(false);
 
-    const initializeGame = useCallback(() => {
+    const initializeGame = () => {
         const pathArr = window.location.pathname.split('/');
         const urlSessionID = pathArr[pathArr.length - 1];
         let session_id = game._id;
@@ -113,9 +113,9 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
         }
 
         if (!game.hasQuitGame) initializeData(session_id, game.assignedPlayer);
-    }, [game._id, game.assignedPlayer, game.hasQuitGame, initializeData]);
+    };
 
-    const updateGameData = useCallback(data => {
+    const updateGameData = data => {
         const gameData = {
             ...game,
             ...data
@@ -124,7 +124,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
         delete gameData.hasPlayerJoined;
 
         updateData(gameData);
-    }, [updateData, game]);
+    };
 
     const checkIfGameQuit = useCallback((hasQuitGame) => {
         if (hasQuitGame) {
@@ -135,40 +135,47 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
         return hasQuitGame;
     }, [cleanUpData]);
 
-    const showSnackbar = useCallback((hasPlayerJoined) => {
-        if (!game.hasP2Joined && (hasPlayerJoined === game.assignedPlayer)) {
+    const showSnackbar = (hasPlayerJoined) => {
+      if (game.assignedPlayer !== undefined) {
+        if (!game.hasP2Joined) {
             setSnackbarMsg('Click on \'Share\' to play with a friend!');
             setHasPlayerJoinedFirstTime(game.hasP2Joined);
         }
-        else if (hasPlayerJoined === game.assignedPlayer) {
-            setSnackbarMsg('You have joined the game!');
-            setHasPlayerJoinedFirstTime(game.hasP2Joined);
-        }
-        else {
-            setSnackbarMsg(`Player ${hasPlayerJoined} has joined!`);
-            setHasPlayerJoinedFirstTime(hasPlayerJoined);
+        else if (hasPlayerJoined) {
+          if (hasPlayerJoined === game.assignedPlayer) {
+              setSnackbarMsg('You have joined the game!');
+              setHasPlayerJoinedFirstTime(game.hasP2Joined);
+          }
+          else {
+              setSnackbarMsg(`Player ${hasPlayerJoined} has joined!`);
+              setHasPlayerJoinedFirstTime(hasPlayerJoined);
+          }
+
+          if (!game.hasQuitGame) updateGameData({ hasP2Joined: game.hasP2Joined });
         }
 
         setIsSnackbarShowing(true);
         setTimeout(() => {
             setIsSnackbarShowing(false);
-            if (!game.hasQuitGame) updateGameData({ hasP2Joined: game.hasP2Joined });
         }, 2000);
-    }, [game.assignedPlayer, game.hasP2Joined, game.hasQuitGame, updateGameData]);
+      }
+    };
 
     useEffect(() => {
-        const hasQuitGame = checkIfGameQuit(game.hasQuitGame);
+        initializeGame();
 
-        if (!hasQuitGame) {
-            initializeGame();
-        }
-    }, [game.hasQuitGame, checkIfGameQuit, initializeGame]);
+        // eslint-disable-next-line
+    }, []);
 
     useEffect(() => {
-        if (game.hasPlayerJoined) {
-            showSnackbar(game.hasPlayerJoined);
-        }
-    }, [game.hasPlayerJoined, showSnackbar]);
+      checkIfGameQuit(game.hasQuitGame);
+    }, [game.hasQuitGame, checkIfGameQuit]);
+
+    useEffect(() => {
+      showSnackbar(game.hasPlayerJoined);
+
+        // eslint-disable-next-line
+    }, [game.hasPlayerJoined, game.assignedPlayer]);
 
     const quitGame = () => {
         const res = window.confirm('Are you sure you want to quit the game?');
@@ -202,11 +209,11 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
     }
 
     const shareNavAction = {label: 'Share', icon: <Share />, isShare: true, shareUrl: `${currentLocation}/game/${game._id}`, noHighlight: true};
-    const resetGameAction = {label: 'Reset', icon: <Refresh />, onClick: () => resetData(game._id), noHighlight: true, isSelected: true};
+    const resetGameAction = {label: 'Reset', icon: <Refresh />, onClick: () => resetData(game._id, game.hasP2Joined), noHighlight: true, isSelected: true};
     const bottomNavData = {
         navActions: [
             {label: 'Chat', icon: <Chat />, onClick: () => alert('This feature is not yet implemented!'), noHighlight: true},
-            // {label: 'Reset', icon: <Refresh />, onClick: () => resetData(game._id), noHighlight: true},
+            // {label: 'Reset', icon: <Refresh />, onClick: () => resetData(game._id, game.hasP2Joined), noHighlight: true},
             {label: 'Quit', icon: <QuitIcon />, onClick: () => quitGame(), noHighlight: true}
         ]
     };
@@ -256,7 +263,7 @@ const mapStateToProps = ({ game }) => ({
 const mapDispatchToProps = dispatch => ({
     initializeData: (session_id, hasAssignedPlayer) => dispatch(initializeData(session_id, hasAssignedPlayer)),
     updateData: gameData => dispatch(updateData(gameData)),
-    resetData: session_id => dispatch(resetData(session_id)),
+    resetData: (session_id, hasP2Joined) => dispatch(resetData(session_id, hasP2Joined)),
     cleanUpData: () => dispatch(cleanUpData())
 });
 

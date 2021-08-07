@@ -80,13 +80,14 @@ export const updateData = gameData => async dispatch => {
     }
 };
 
-export const resetData = session_id => async dispatch => {
+export const resetData = (session_id, hasP2Joined) => async dispatch => {
     try {
-        const game = { 
+        const game = {
             ..._nullSession
         };
 
         game._id = session_id;
+        game.hasP2Joined = hasP2Joined;
         apiUtil.update(game);
     }
     catch(err) {

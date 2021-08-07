@@ -31,7 +31,7 @@ module.exports = async (io, client, database) => {
                 }
 
                 console.log('Game Data Initialized on MongoDB!');
-                socket.emit('gameDataInitRes', { game: res });
+                socket.emit('gameDataInitRes', { game: resGameData });
                 socket.to(session_id).emit('gameDataUpdateRes', { game: resGameData });
             }
             catch(e) {
