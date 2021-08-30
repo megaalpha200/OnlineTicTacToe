@@ -31,11 +31,16 @@ body {
     background-color: #FFFFFF;
 }
 
+html, body, #root, .App {
+    height: auto;
+}
+
 article{
     /*border: 2px dashed #cc0000;*/
     padding: 0.5rem 0.5rem;
     border-radius: 20px;
     width: 100%;
+    height: auto;
     display: block;
     position: relative;
 }

@@ -14,7 +14,7 @@ import GameBottomNavigation from 'components/Helpers/GameBottomNavigation.jsx';
 const checkIfHeadingIsNeeded = heading => {
   if (heading !== 'undefined') {
     return (
-      <section>
+      <section id="main-header-container">
           <div id="main-header">
               {heading}
           </div>
@@ -25,7 +25,7 @@ const checkIfHeadingIsNeeded = heading => {
 }
 
 const WebPage = props => (
-  <div>
+  <div style={{ height: '100%' }}>
     {
       (props.doesScrollToTop)
       ?
@@ -39,23 +39,23 @@ const WebPage = props => (
     </head>
 
     {
-        (props.headerFooterShow) ? 
-        <Header 
+      (!props.showBottomNav && props.headerFooterShow) ?
+        <Header
           headerType={props.headerType}
           pageTitle={props.pageTitle}
           isHeaderDisappearing={props.isHeaderDisappearing}
           adminSettingsFABActionData={props.adminSettingsFABActionData}
-        /> 
-        : ''
-      }
+        />
+      : ''
+    }
 
-      <article>
-        {checkIfHeadingIsNeeded(props.pageHeading)}
-        {props.children}
-        {(props.showBottomNav) ? <p style={{ backgroundColor: 'transparent', marginBottom: '10em' }}></p> : ""}
-        {/* <Fab id="scroll-to-top-fab" onClick={scroll}><UpIcon /></Fab> */}
-      </article>
-      {(props.showBottomNav) ? <GameBottomNavigation navActions={props.bottomNavData.navActions} /> : (props.headerFooterShow) ? <Footer /> : ""}
+    <article>
+      {checkIfHeadingIsNeeded(props.pageHeading)}
+      {props.children}
+      {(props.showBottomNav) ? <p style={{ backgroundColor: 'transparent', marginBottom: '10em' }} /> : ""}
+      {/* <Fab id="scroll-to-top-fab" onClick={scroll}><UpIcon /></Fab> */}
+    </article>
+    {(props.showBottomNav) ? <GameBottomNavigation navActions={props.bottomNavData.navActions} /> : (props.headerFooterShow) ? <Footer /> : ""}
   </div>
 );
 

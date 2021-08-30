@@ -3,16 +3,30 @@
     margin: 20px;
   } */
 
+html, body, #root, .App {
+    height: 100%;
+}
+
+article {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#main-header-container {
+    flex: 10%;
+}
+
 .game {
     display: flex;
     flex-direction: column;
     align-content: center;
     justify-content: center;
+    flex: 90%;
 }
 
 .game-board {
     margin: auto;
-    margin-top: 1rem;
 }
 
 .game-board > .game-row::after {

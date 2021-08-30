@@ -96,6 +96,8 @@ class Login extends Component {
                     </Form>
                     <br />
                     <Link to="/signup">Need an Account? Click Here to Create One!</Link>
+                    <br />
+                    <Link to="/">Home</Link>
                 </section>
             </WebPage>
         );

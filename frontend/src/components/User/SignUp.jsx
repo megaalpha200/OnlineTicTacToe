@@ -189,6 +189,8 @@ const SignUp = ({errors, signup, isAdmin}) => {
                         <Link to="/login">Have an Account? Click Here to Log In!</Link>
 
                 }
+                <br />
+                <Link to="/">Home</Link>
             </section>
         </WebPage>
     );

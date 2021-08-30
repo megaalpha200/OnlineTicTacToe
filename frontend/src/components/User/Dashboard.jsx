@@ -5,7 +5,7 @@ import { toggleEditMarqueeText, updateMarqueeText, clearMarqueeText, updateLastU
 import { clearAllSessions } from 'actions/session';
 import { clearAllGameSessions } from 'actions/game';
 import { Badge, Button } from '@material-ui/core';
-import { Edit as EditIcon, Close as CloseIcon, ClearAll as ClearIcon, Send as UpdateTextIcon, PersonAdd as NewUserIcon, DeleteSweep, AccountCircle as AccountIcon, Update as UpdateTimeIcon } from '@material-ui/icons';
+import { Edit as EditIcon, Close as CloseIcon, ClearAll as ClearIcon, Send as UpdateTextIcon, PersonAdd as NewUserIcon, DeleteSweep, AccountCircle as AccountIcon, Update as UpdateTimeIcon, Home as HomeIcon } from '@material-ui/icons';
 import Console from 'components/User/Console.jsx';
 import ChangeUserAccountDetailsModal from 'components/User/ChangeUserAccountDetailsDialog.jsx';
 import WebPage from 'components/Helpers/WebPage.jsx';
@@ -47,7 +47,8 @@ const Dashboard  = props => {
                         { name: 'Update My Account Details', icon: <AccountIcon />, onClick: () => setIsAccountDetailsModalOpen(true) },
                         { name: 'Add New User', icon: <NewUserIcon />, onClick: () => history.push('/signup-new-user'), adminOnly: true },
                         { name: 'Clear All Game Sessions', icon: <DeleteSweep />, onClick: () => props.clearAllGameSessions(), adminOnly: true },
-                        { name: 'Clear User Sessions', icon: <DeleteSweep />, onClick: () => props.clearAllSessions(), adminOnly: true }
+                        { name: 'Clear User Sessions', icon: <DeleteSweep />, onClick: () => props.clearAllSessions(), adminOnly: true },
+                        { name: 'Go Home', icon: <HomeIcon />, onClick: () => history.push('/') }
                     ],
                     keepOpen: false
                 }

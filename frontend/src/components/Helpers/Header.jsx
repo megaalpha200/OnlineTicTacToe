@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import history from 'util/history';
-import { Link } from 'react-router-dom';
 import { connect } from 'react-redux';
 import { logout, subscribeToSessionValidation } from 'actions/session';
 import { toggleEditMarqueeText, setMarqueeText } from 'actions/site_info';
@@ -26,7 +25,7 @@ const NormalHeader = props => {
 
     return(
         <div>
-            <Link to="/"><img id="header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
+            <a href="https://jaaproductions.com" target="new_tab"><img id="header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></a>
             <p id="motto">{motto}</p>
             <nav>
                 {/* Full Menu */}
@@ -57,9 +56,9 @@ const NormalHeader = props => {
 const AltHeader = () => {
     return(
         <div>
-            <Link to="/"><img id="alt-header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></Link>
-            <p id="alt-motto">{motto}</p>
-            <br />
+            <a href="https://jaaproductions.com" target="new_tab"><img id="header-img" src={mainHeaderImg} alt={`Website title: ${websiteTitle}`} /></a>
+            {/*<p id="alt-motto">{motto}</p>*/}
+            <br /><br />
             {/* <nav id="alt-nav">
                 <Link id="back-button" to="/">{'<-- Back Home'}</Link>
             </nav> */}

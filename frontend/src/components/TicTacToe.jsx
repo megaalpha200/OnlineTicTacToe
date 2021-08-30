@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { connect } from 'react-redux';
+import history from "util/history";
 import { initializeData, updateData, resetData, cleanUpData } from 'actions/game';
 import { currentLocation } from 'util/helpers';
-import { Share, Chat, ExitToApp as QuitIcon, Refresh, SportsEsports as GameIcon } from '@material-ui/icons';
+import { Share, Chat, ExitToApp as QuitIcon, Refresh, SportsEsports as GameIcon, SupervisorAccount as ConsoleIcon } from '@material-ui/icons';
 import ReactSnackbar from 'react-js-snackbar';
 import WebPage from 'components/Helpers/WebPage.jsx';
 import 'assets/TicTacToe/css/ticTacToeStyle.css';
@@ -98,7 +99,7 @@ const GameBoard = ({ squareData, winningLine, isDraw, assignedPlayer, onSquareCl
     );
 }
 
-const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData }) => {
+const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, isAdmin }) => {
     const [isSnackbarShowing, setIsSnackbarShowing] = useState(false);
     const [snackbarMsg, setSnackbarMsg] = useState('');
     const [hasPlayerJoinedFirstTime, setHasPlayerJoinedFirstTime] = useState(false);
@@ -210,6 +211,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
 
     const shareNavAction = {label: 'Share', icon: <Share />, isShare: true, shareUrl: `${currentLocation}/game/${game._id}`, noHighlight: true};
     const resetGameAction = {label: 'Reset', icon: <Refresh />, onClick: () => resetData(game._id, game.hasP2Joined), noHighlight: true, isSelected: true};
+    const adminDashboardAction = {label: 'Dashboard', icon: <ConsoleIcon />, onClick: () => history.push('/dashboard'), noHighlight: true};
     const bottomNavData = {
         navActions: [
             {label: 'Chat', icon: <Chat />, onClick: () => alert('This feature is not yet implemented!'), noHighlight: true},
@@ -220,12 +222,14 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
 
     if (game.assignedPlayer === 1 && !hasPlayerJoinedFirstTime) bottomNavData.navActions.unshift(shareNavAction);
     if (game.winningPlayer || game.isDraw) bottomNavData.navActions.unshift(resetGameAction);
+    if (isAdmin) bottomNavData.navActions.unshift(adminDashboardAction);
+
+    const playerTurnMessage = `You are ${(game.assignedPlayer === 1) ? 'X' : 'O'}! It is ${(game.currPlayerTurn === game.assignedPlayer) ? 'your' : (game.currPlayerTurn === 1) ? 'X\'s' : 'O\'s'} turn!`;
+    const gameOverMessage = `Game Over! ${(game.isDraw) ? "It's a draw!" : (game.winningPlayer === 1) ? 'X Wins!' : 'O Wins!'}`;
 
     return (
-        <WebPage pageTitle="Tic Tac Toe" headerType="Alt" showBottomNav bottomNavData={bottomNavData}>
-            <section className="game">
-                <p>Player {game.currPlayerTurn}'s Turn!</p>
-                <br />
+        <WebPage pageTitle="Tic Tac Toe" pageHeading={(game.winningPlayer || game.isDraw) ? gameOverMessage : playerTurnMessage} showBottomNav bottomNavData={bottomNavData}>
+            <section className="game" style={{ backgroundColor: '#FFFFFF' }}>
                 <GameBoard
                     assignedPlayer={game.assignedPlayer}
                     currPlayerTurn={game.currPlayerTurn}
@@ -240,7 +244,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
                 (game.winningPlayer || game.isDraw)
                 ?
                     <>
-                        <p><u>Winner:</u> <strong>{(game.isDraw) ? 'It\'s a Draw!' : `Player ${game.winningPlayer}`}</strong></p>
+                        <p><u>Winner:</u> <strong>{(game.isDraw) ? 'Draw!' : `Player ${game.winningPlayer}`}</strong></p>
                         <br />
                     </>
                 :
@@ -256,8 +260,9 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData })
     );
 }
 
-const mapStateToProps = ({ game }) => ({
-    game
+const mapStateToProps = ({ game, session: { userId, isAdmin } }) => ({
+    game,
+    isAdmin: Boolean(userId) && Boolean(isAdmin)
 });
 
 const mapDispatchToProps = dispatch => ({
