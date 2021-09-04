@@ -38,6 +38,28 @@ module.exports = class SessionsDAO {
       return result;
     }
 
+    static async updateUserSessions(userId, sessionData, isAdmin) {
+        let result;
+
+        checkIfAdmin(isAdmin);
+
+        try {
+            const userOID = mongo.ObjectID(userId);
+            sessionData.userId = userOID;
+
+            await sessions.updateMany({ 'session.user.userId': userOID }, { '$set': { 'session.user': sessionData } });
+            result = 'OK';
+        }
+        catch(err) {
+            console.error(
+                `Unable clear user sessions in sessionsDAO: ${err}`
+            );
+            throw err;
+        }
+
+        return result;
+    }
+
     static async clearUserSessions(userId) {
       let result;
   

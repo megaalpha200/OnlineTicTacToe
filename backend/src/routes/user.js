@@ -3,6 +3,7 @@ import cors from 'cors';
 import Joi from 'joi';
 import mongo from 'mongodb';
 import User from '../models/user';
+import SessionsDAO from '../DAO/sessionsDAO';
 import { signUp, signIn, changePassword, changeUsername } from '../validations/user';
 import { parseError, sessionizeUser, corsOptionsDelegate, addHeaders, onRouteError, isAdmin, checkIfAdmin, generateSalt, generateAuth, isJSONPropDefined } from '../util/helpers';
 
@@ -200,6 +201,10 @@ userRoutes.post('/modify-user-data', async (req, res) => {
         const { _id, userData } = req.body.user;
 
         await User.updateOne({ _id }, userData);
+
+        const sessionizedUserData = sessionizeUser({ _id, ...userData });
+        await SessionsDAO.updateUserSessions(_id, sessionizedUserData, isAdmin(req));
+
         res.status(200).send('OK');
     }
     catch(err) {

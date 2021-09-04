@@ -225,7 +225,8 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, i
     if (isAdmin) bottomNavData.navActions.unshift(adminDashboardAction);
 
     const playerTurnMessage = `You are ${(game.assignedPlayer === 1) ? 'X' : 'O'}! It is ${(game.currPlayerTurn === game.assignedPlayer) ? 'your' : (game.currPlayerTurn === 1) ? 'X\'s' : 'O\'s'} turn!`;
-    const gameOverMessage = `Game Over! ${(game.isDraw) ? "It's a draw!" : (game.winningPlayer === 1) ? 'X Wins!' : 'O Wins!'}`;
+    const winnerMessage =  (game.winningPlayer === 1) ? 'X Wins!' : 'O Wins!';
+    const gameOverMessage = `${(game.isDraw) ? "Game Over! It's a draw!" : (game.winningPlayer === game.assignedPlayer) ? 'Congratulations! You Win!' : `gg! ${winnerMessage}`}`;
 
     return (
         <WebPage pageTitle="Tic Tac Toe" pageHeading={(game.winningPlayer || game.isDraw) ? gameOverMessage : playerTurnMessage} showBottomNav bottomNavData={bottomNavData}>
