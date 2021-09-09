@@ -63,7 +63,8 @@ const Footer = props => (
             <p id="copyright">
                 &copy; J.A.A. Productions 2020 - {new Date().getFullYear()}<br />All Rights Reserved
                 <br />
-                Powered by <a href="https://jaaproductions.com" target="new_tab" style={{ color: 'white', textDecoration: 'none', fontStyle: 'italic' }}>J.A.A. Productions</a> and the <a href="https://hexipidemo.tk" target="new_tab" style={{ color: 'white', textDecoration: 'none', fontStyle: 'italic' }}>#HexiPi Template</a>
+                Powered by <a href="https://jaaproductions.com" target="new_tab" style={{ color: 'white', textDecoration: 'none', fontStyle: 'italic' }}>J.A.A. Productions</a>
+                {/*and the <a href="https://hexipidemo.tk" target="new_tab" style={{ color: 'white', textDecoration: 'none', fontStyle: 'italic' }}>#HexiPi Template</a>*/}
             </p>
         </div>
     </div>
