@@ -4,7 +4,7 @@
   } */
 
 html, body, #root, .App {
-    height: 100%;
+    height: 98%;
 }
 
 article {
@@ -22,7 +22,8 @@ article {
     flex-direction: column;
     align-content: center;
     justify-content: center;
-    flex: 90%;
+    overflow: hidden;
+    flex: 70%;
 }
 
 .game-board {
@@ -60,6 +61,41 @@ article {
 
 .game-square.highlighted {
     background-color: green;
+}
+
+#chat-collapse {
+    flex: 20%;
+    height: 100%;
+}
+
+#chat-collapse .MuiCollapse-wrapper {
+    height: 100%;
+}
+
+#chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+#chat {
+    margin: 0;
+    overflow: auto;
+    flex: 85%;
+}
+
+#chat-message-field-container {
+    flex: 15%;
+    width: 100%;
+    display: flex;
+}
+
+#chat-message-field-input {
+    flex: 95%;
+}
+
+#chat-message-field-submit-btn {
+    flex: 5%;
 }
 
 @media only screen and (max-width: 960px) {

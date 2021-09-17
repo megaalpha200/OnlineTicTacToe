@@ -16,9 +16,15 @@ export const update = (data) => {
     socket.emit('gameDataUpdateReq', data._id, data);
 }
 
-export const initializeUpdateSocket = (session_id, assignedPlayer, callback) => {
+export const sendChatMessage = (session_id, assignedPlayer, message) => {
     const socket = SocketIOClient(socketEndpoint);
-    socket.on('gameDataUpdateRes', callback);
+    socket.emit('gameDataChatMsgSentReq', session_id, assignedPlayer, message);
+}
+
+export const initializeUpdateSocket = (session_id, assignedPlayer, gameDataCallback, chatDataCallback) => {
+    const socket = SocketIOClient(socketEndpoint);
+    socket.on('gameDataUpdateRes', gameDataCallback);
+    socket.on('gameDataChatMsgSentRes', chatDataCallback);
     socket.emit('room', session_id);
     
     if (session_id && assignedPlayer) socket.emit('gameDataRejoinReq', session_id, assignedPlayer);

@@ -6,6 +6,8 @@ import { _nullSession } from 'reducers/game/game';
 
 export const INITIALIZE_GAME_DATA = 'INITIALIZE_GAME_DATA';
 export const UPDATE_GAME_DATA = 'UPDATE_GAME_DATA';
+export const UPDATE_CHAT_DATA = 'UPDATE_CHAT_DATA';
+export const CLEAR_RECEIVED_MESSAGE_FLAG = 'CLEAR_RECEIVED_MESSAGE_FLAG';
 export const CLEAR_GAME_DATA = 'CLEAR_GAME_DATA';
 export const CLEAR_GAME_SESSIONS = 'CLEAR_GAME_SESSIONS';
 
@@ -17,6 +19,15 @@ const initializeGameData = gameData => ({
 const updateGameData = gameData => ({
     type: UPDATE_GAME_DATA,
     gameData
+});
+
+const updateChatData = chatData => ({
+   type: UPDATE_CHAT_DATA,
+   chatData
+});
+
+export const clearMessageReceivedFlag = () => ({
+   type: CLEAR_RECEIVED_MESSAGE_FLAG
 });
 
 const clearGameData = () => ({
@@ -46,7 +57,25 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
     return dispatch(receiveErrors(parseError(receivedGameData)));
 }
 
-const initUpdateSocket = (session_id, assignedPlayer, dispatch) => apiUtil.initializeUpdateSocket(session_id, assignedPlayer, updateData => handleReceivedGameData(updateData, dispatch, updateGameData));
+const handleReceivedChatData = async (receivedChatData, dispatch) => {
+    if (receivedChatData) {
+        const sessionData = {
+            session_id: receivedChatData.game_session_id
+        };
+
+        await apiUtil.persistGameSession(sessionData);
+
+        return dispatch(updateChatData(receivedChatData));
+    }
+
+    return dispatch(receiveErrors(parseError(receivedChatData)));
+}
+
+const initUpdateSocket = (session_id, assignedPlayer, dispatch) => apiUtil.initializeUpdateSocket(session_id,
+    assignedPlayer,
+    updateData => handleReceivedGameData(updateData, dispatch, updateGameData),
+    chatData => handleReceivedChatData(chatData, dispatch)
+);
 
 export const initializeData = (session_id, assignedPlayer) => async dispatch => {
     try {
@@ -60,6 +89,9 @@ export const initializeData = (session_id, assignedPlayer) => async dispatch => 
         if (session_id) { // Only if a second player is joining
             initData._id = session_id;
         }
+
+        delete initData.chatMessages;
+        delete initData.hasReceivedMessage;
 
         apiUtil.initialize(initData, async data => {
             await handleReceivedGameData(data, dispatch, initializeGameData, true);
@@ -115,6 +147,15 @@ export const clearAllGameSessions = () => async dispatch => {
                 return dispatch(clearGameSessions());
             });
         }
+    }
+    catch(err) {
+        return dispatch(receiveErrors(parseError(err)));
+    }
+};
+
+export const sendChatMessage = (msgData) => async dispatch => {
+    try {
+        apiUtil.sendChatMessage(msgData.session_id, msgData.assignedPlayer, msgData.message);
     }
     catch(err) {
         return dispatch(receiveErrors(parseError(err)));

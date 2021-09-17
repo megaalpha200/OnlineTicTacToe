@@ -52,7 +52,6 @@ const WebPage = props => (
     <article>
       {checkIfHeadingIsNeeded(props.pageHeading)}
       {props.children}
-      {(props.showBottomNav) ? <p style={{ backgroundColor: 'transparent', marginBottom: '10em' }} /> : ""}
       {/* <Fab id="scroll-to-top-fab" onClick={scroll}><UpIcon /></Fab> */}
     </article>
     {(props.showBottomNav) ? <GameBottomNavigation navActions={props.bottomNavData.navActions} /> : (props.headerFooterShow) ? <Footer /> : ""}
@@ -69,7 +68,7 @@ WebPage.propTypes = {
   doesScrollToTop: PropTypes.bool,
   adminSettingsFABActionData: PropTypes.shape({ actions: PropTypes.array, keepOpen: PropTypes.bool }),
   showBottomNav: PropTypes.bool,
-  navActions: PropTypes.shape({ navActions: PropTypes.array.isRequired }).isRequired,
+  bottomNavData: PropTypes.shape({ navActions: PropTypes.array.isRequired }),
 };
 
 WebPage.defaultProps = {

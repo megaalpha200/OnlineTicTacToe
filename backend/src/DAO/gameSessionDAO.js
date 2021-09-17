@@ -3,6 +3,7 @@ var checkIfAdmin = require('../util/helpers').checkIfAdmin;
 
 let db;
 let gameSessions;
+let gameChatMessages;
 
 module.exports = class gameSessionDAO {
     static async injectDB(conn, database) {
@@ -12,6 +13,7 @@ module.exports = class gameSessionDAO {
         try {
             db = await conn.db(database);
             gameSessions = await db.collection('gameSessions');
+            gameChatMessages = await db.collection('gameChatMessages');
         }
         catch(err) {
             console.error(
@@ -34,7 +36,7 @@ module.exports = class gameSessionDAO {
                 result._id = gameData._id;
             }
             else {
-                result = await gameSessions.findOne({ _id: mongo.ObjectID(session_id) });
+                result = await this.retrieveGameData(session_id);
                 result.assignedPlayer = 2;
             }
         }
@@ -87,6 +89,7 @@ module.exports = class gameSessionDAO {
 
         try {
             await gameSessions.deleteOne({ _id: mongo.ObjectID(session_id) });
+            await gameChatMessages.deleteMany({ game_session_id: mongo.ObjectID(session_id) });
             result = 'OK';
         }
         catch(err) {
@@ -104,6 +107,7 @@ module.exports = class gameSessionDAO {
 
         try {
             result = await gameSessions.findOne({'_id': mongo.ObjectID(session_id)});
+            if (result) result.chatMessages = await gameChatMessages.find({ 'game_session_id': mongo.ObjectID(session_id) }, { 'sort': { 'timestamp': 1 } }).toArray();
         }
         catch(err) {
             console.error(
@@ -127,6 +131,23 @@ module.exports = class gameSessionDAO {
         catch(err) {
             console.error(
                 `Unable to delete game sessions in gameSessionDAO: ${err}`
+            );
+            throw err;
+        }
+
+        return result;
+    }
+
+    static async recordChatMessage(session_id, player, message) {
+        let result = null;
+
+        try {
+            result = { game_session_id: mongo.ObjectID(session_id), 'body': message, assignedPlayer: Number(player), 'timestamp': Number(new Date().getTime()) };
+            await gameChatMessages.insertOne(result);
+        }
+        catch(err) {
+            console.error(
+                `Unable to record chat message in gameSessionDAO: ${err}`
             );
             throw err;
         }

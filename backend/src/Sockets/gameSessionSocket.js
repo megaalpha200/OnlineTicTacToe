@@ -64,5 +64,16 @@ module.exports = async (io, client, database) => {
                 socket.in(session_id).emit('gameDataUpdateRes', { message: 'Could not update game data!', game: {} });
             }
         });
+
+        socket.on('gameDataChatMsgSentReq', async (session_id, player, message) => {
+            try {
+                const res = await gameSessionDAO.recordChatMessage(session_id, player, message);
+                socket.in(session_id).emit('gameDataChatMsgSentRes', res);
+            }
+            catch(e) {
+                console.log(e.message);
+                socket.emit('gameDataChatMsgSentRes', { body: 'Error sending message!', assignedPlayer: Number(player), timestamp: Number(new Date().getTime()) });
+            }
+        });
     });
 };
