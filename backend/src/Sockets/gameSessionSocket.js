@@ -75,5 +75,14 @@ module.exports = async (io, client, database) => {
                 socket.emit('gameDataChatMsgSentRes', { body: 'Error sending message!', assignedPlayer: Number(player), timestamp: Number(new Date().getTime()) });
             }
         });
+
+        socket.on('gameDataChatIsTypingReq', async (session_id, assignedPlayer, isTyping) => {
+            try {
+                socket.in(session_id).emit('gameDataChatIsTypingRes', { isTyping: isTyping, assignedPlayer: assignedPlayer });
+            }
+            catch(e) {
+                console.log(e.message);
+            }
+        });
     });
 };

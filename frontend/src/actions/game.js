@@ -8,6 +8,8 @@ export const INITIALIZE_GAME_DATA = 'INITIALIZE_GAME_DATA';
 export const UPDATE_GAME_DATA = 'UPDATE_GAME_DATA';
 export const UPDATE_CHAT_DATA = 'UPDATE_CHAT_DATA';
 export const CLEAR_RECEIVED_MESSAGE_FLAG = 'CLEAR_RECEIVED_MESSAGE_FLAG';
+export const SET_IS_TYPING_FLAG = 'SET_IS_TYPING_FLAG';
+export const CLEAR_IS_TYPING_FLAG = 'CLEAR_IS_TYPING_FLAG';
 export const CLEAR_GAME_DATA = 'CLEAR_GAME_DATA';
 export const CLEAR_GAME_SESSIONS = 'CLEAR_GAME_SESSIONS';
 
@@ -28,6 +30,16 @@ const updateChatData = chatData => ({
 
 export const clearMessageReceivedFlag = () => ({
    type: CLEAR_RECEIVED_MESSAGE_FLAG
+});
+
+export const setIsTypingFlag = assignedPlayerTyping => ({
+   type: SET_IS_TYPING_FLAG,
+    assignedPlayerTyping
+});
+
+export const clearIsTypingFlag = assignedPlayerTyping => ({
+    type: CLEAR_IS_TYPING_FLAG,
+    assignedPlayerTyping
 });
 
 const clearGameData = () => ({
@@ -59,13 +71,23 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
 
 const handleReceivedChatData = async (receivedChatData, dispatch) => {
     if (receivedChatData) {
-        const sessionData = {
-            session_id: receivedChatData.game_session_id
-        };
+        if (receivedChatData.isTyping === undefined) {
+            const sessionData = {
+                session_id: receivedChatData.game_session_id
+            };
 
-        await apiUtil.persistGameSession(sessionData);
+            await apiUtil.persistGameSession(sessionData);
 
-        return dispatch(updateChatData(receivedChatData));
+            return dispatch(updateChatData(receivedChatData));
+        }
+        else {
+            if (receivedChatData.isTyping) {
+                return dispatch(setIsTypingFlag(receivedChatData.assignedPlayer));
+            }
+            else {
+                return dispatch(clearIsTypingFlag(receivedChatData.assignedPlayer));
+            }
+        }
     }
 
     return dispatch(receiveErrors(parseError(receivedChatData)));
@@ -84,14 +106,11 @@ export const initializeData = (session_id, assignedPlayer) => async dispatch => 
             return;
         }
 
-        let initData = {..._nullSession};
+        let initData = prepareGameDataForSending({ ..._nullSession });
 
         if (session_id) { // Only if a second player is joining
             initData._id = session_id;
         }
-
-        delete initData.chatMessages;
-        delete initData.hasReceivedMessage;
 
         apiUtil.initialize(initData, async data => {
             await handleReceivedGameData(data, dispatch, initializeGameData, true);
@@ -114,9 +133,7 @@ export const updateData = gameData => async dispatch => {
 
 export const resetData = (session_id, hasP2Joined) => async dispatch => {
     try {
-        const game = {
-            ..._nullSession
-        };
+        const game = prepareGameDataForSending({ ..._nullSession });
 
         game._id = session_id;
         game.hasP2Joined = hasP2Joined;
@@ -153,6 +170,15 @@ export const clearAllGameSessions = () => async dispatch => {
     }
 };
 
+export const signalPlayerTyping = (session_id, assignedPlayer, isTyping) => async dispatch => {
+    try {
+        apiUtil.signalPlayerTyping(session_id, assignedPlayer, isTyping);
+    }
+    catch(err) {
+        return dispatch(receiveErrors(parseError(err)));
+    }
+};
+
 export const sendChatMessage = (msgData) => async dispatch => {
     try {
         apiUtil.sendChatMessage(msgData.session_id, msgData.assignedPlayer, msgData.message);
@@ -161,3 +187,11 @@ export const sendChatMessage = (msgData) => async dispatch => {
         return dispatch(receiveErrors(parseError(err)));
     }
 };
+
+const prepareGameDataForSending = (gameData) => {
+    delete gameData.chatMessages;
+    delete gameData.hasReceivedMessage;
+    delete gameData.isOtherPlayerTyping;
+
+    return gameData;
+}
