@@ -27,7 +27,7 @@ article {
 }
 
 .game.reduced {
-    flex: 40%;
+    flex: 30%;
 }
 
 .game-board {
@@ -56,9 +56,9 @@ article {
 }
 
 .game-square.reduced {
-    font-size: 3em;
-    height: 5rem;
-    width: 5rem;
+    font-size: 2em;
+    height: 2rem;
+    width: 2rem;
 }
 
 .game-square.draw {
@@ -79,7 +79,7 @@ article {
 }
 
 #chat-collapse.expanded {
-    flex: 50%;
+    flex: 60%;
     height: 100%;
 }
 
