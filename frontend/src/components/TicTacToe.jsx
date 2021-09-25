@@ -121,7 +121,7 @@ const GameBoard = ({ squareData, winningLine, isDraw, assignedPlayer, onSquareCl
     );
 }
 
-const Chat = ({ session_id, chatMessages, displayChat, currentChatMessage, setCurrentChatMessage, isOtherPlayerTyping, handlePlayerTyping, handleSubmitChatMessage, resetChatNotification }) => {
+const Chat = ({ session_id, assignedPlayer, chatMessages, displayChat, currentChatMessage, setCurrentChatMessage, isOtherPlayerTyping, handlePlayerTyping, handleSubmitChatMessage, resetChatNotification }) => {
     let chatEndRef = useRef();
     let chatInputRef = useRef();
 
@@ -196,7 +196,10 @@ const Chat = ({ session_id, chatMessages, displayChat, currentChatMessage, setCu
                     {renderChatMessages(chatMessages)}
                 </section>
                 <div id="chat-other-player-typing-container" hidden={!isOtherPlayerTyping}>
-                    <span>Player is typing...</span>
+                    <span>Player {(assignedPlayer === 1) ? 'O' : 'X'} is typing</span>
+                    <span id="chat-other-player-typing-ellipse-1" className="chat-other-player-typing-ellipse">.</span>
+                    <span id="chat-other-player-typing-ellipse-2" className="chat-other-player-typing-ellipse">.</span>
+                    <span id="chat-other-player-typing-ellipse-3" className="chat-other-player-typing-ellipse">.</span>
                 </div>
                 <form id="chat-message-field-container" onSubmit={handleSubmitChatMessage} method="post">
                     <FormControl fullWidth>
@@ -424,6 +427,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
             </section>
             <Chat
                 session_id={game._id}
+                assignedPlayer={game.assignedPlayer}
                 chatMessages={game.chatMessages}
                 displayChat={displayChat}
                 currentChatMessage={currentChatMessage}

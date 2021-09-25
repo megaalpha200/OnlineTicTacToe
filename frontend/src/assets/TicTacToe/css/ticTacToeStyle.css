@@ -56,7 +56,7 @@ article {
 }
 
 .game-square.reduced {
-    font-size: 2em;
+    font-size: 1.8em;
     height: 2rem;
     width: 2rem;
 }
@@ -97,6 +97,47 @@ article {
     margin: 0;
     overflow: auto;
     flex: 85%;
+}
+
+#chat-other-player-typing-container span {
+    font-style: italic;
+    font-weight: normal;
+    font-size: medium;
+    line-height: 0;
+}
+
+@keyframes ellipse-bold {
+    0% {font-weight: normal; font-size: medium}
+    10% {font-weight: normal; font-size: medium}
+    20% {font-weight: normal; font-size: medium}
+    30% {font-weight: bold; font-size: x-large}
+    40% {font-weight: bold; font-size: x-large}
+    50% {font-weight: bold; font-size: x-large}
+    60% {font-weight: bold; font-size: x-large}
+    70% {font-weight: bold; font-size: x-large}
+    80% {font-weight: normal; font-size: medium}
+    90% {font-weight: normal; font-size: medium}
+    100% {font-weight: normal; font-size: medium}
+}
+
+.chat-other-player-typing-ellipse {
+    animation-name: ellipse-bold;
+    animation-duration: calc(var(--animation-order) * 1.2s);
+    animation-direction: alternate-reverse;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-out;
+}
+
+#chat-other-player-typing-ellipse-1 {
+    --animation-order: 1;
+}
+
+#chat-other-player-typing-ellipse-2 {
+    --animation-order: 2;
+}
+
+#chat-other-player-typing-ellipse-3 {
+    --animation-order: 3;
 }
 
 #chat-other-player-typing-container {
