@@ -57,6 +57,10 @@ gameRouterAPI.post('', async (req, res) => {
             req.session.assignedPlayer = req.body.assignedPlayer;
         }
 
+        if (req.body.playerName) {
+            req.session.playerName = req.body.playerName;
+        }
+
         res.send({});
     }
     catch (err) {

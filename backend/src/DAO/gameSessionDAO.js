@@ -36,8 +36,9 @@ module.exports = class gameSessionDAO {
                 result._id = gameData._id;
             }
             else {
-                result = await this.retrieveGameData(session_id);
+                result = await this.retrieveGameData(session_id, false);
                 result.assignedPlayer = 2;
+                result.p2Name = gameData.p2Name;
             }
         }
         catch(err) {
@@ -102,12 +103,12 @@ module.exports = class gameSessionDAO {
         return result;
     }
 
-    static async retrieveGameData(session_id) {
+    static async retrieveGameData(session_id, withChatData = true) {
         let result = null;
 
         try {
             result = await gameSessions.findOne({'_id': mongo.ObjectID(session_id)});
-            if (result) result.chatMessages = await gameChatMessages.find({ 'game_session_id': mongo.ObjectID(session_id) }, { 'sort': { 'timestamp': 1 } }).toArray();
+            if (result && withChatData) result.chatMessages = await gameChatMessages.find({ 'game_session_id': mongo.ObjectID(session_id) }, { 'sort': { 'timestamp': 1 } }).toArray();
         }
         catch(err) {
             console.error(

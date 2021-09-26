@@ -3,7 +3,7 @@ import { connect } from 'react-redux';
 import history from "util/history";
 import { initializeData, updateData, resetData, cleanUpData, signalPlayerTyping, sendChatMessage, clearMessageReceivedFlag } from 'actions/game';
 import { currentLocation } from 'util/helpers';
-import { Collapse, Badge, Button, FormControl, OutlinedInput } from "@material-ui/core";
+import { Collapse, Badge, Button, FormControl, OutlinedInput, Dialog, DialogTitle, DialogContent, TextField, DialogActions, DialogContentText } from "@material-ui/core";
 import { withStyles } from "@material-ui/core/styles";
 import { Share, Chat as ChatIcon, ExitToApp as QuitIcon, Refresh, SportsEsports as GameIcon, SupervisorAccount as ConsoleIcon, Send as SendIcon } from '@material-ui/icons';
 import { green, yellow } from "@material-ui/core/colors";
@@ -121,7 +121,7 @@ const GameBoard = ({ squareData, winningLine, isDraw, assignedPlayer, onSquareCl
     );
 }
 
-const Chat = ({ session_id, assignedPlayer, chatMessages, displayChat, currentChatMessage, setCurrentChatMessage, isOtherPlayerTyping, handlePlayerTyping, handleSubmitChatMessage, resetChatNotification }) => {
+const Chat = ({ session_id, assignedPlayer, p1Name, p2Name, chatMessages, displayChat, currentChatMessage, setCurrentChatMessage, isOtherPlayerTyping, handlePlayerTyping, handleSubmitChatMessage, resetChatNotification }) => {
     let chatEndRef = useRef();
     let chatInputRef = useRef();
 
@@ -130,7 +130,7 @@ const Chat = ({ session_id, assignedPlayer, chatMessages, displayChat, currentCh
 
         if (messages) {
             renderedChatMessage = messages.map(message => (
-                <p><strong>{`Player ${(message.assignedPlayer === 1) ? 'X' : 'O'}`}</strong>: {message.body}</p>
+                <p><strong>{(message.assignedPlayer === 1) ? p1Name : p2Name}</strong>: {message.body}</p>
             ));
         }
 
@@ -196,7 +196,7 @@ const Chat = ({ session_id, assignedPlayer, chatMessages, displayChat, currentCh
                     {renderChatMessages(chatMessages)}
                 </section>
                 <div id="chat-other-player-typing-container" hidden={!isOtherPlayerTyping}>
-                    <span>Player {(assignedPlayer === 1) ? 'O' : 'X'} is typing</span>
+                    <span>{(assignedPlayer === 1) ? p2Name : p1Name} is typing</span>
                     <span id="chat-other-player-typing-ellipse-1" className="chat-other-player-typing-ellipse">.</span>
                     <span id="chat-other-player-typing-ellipse-2" className="chat-other-player-typing-ellipse">.</span>
                     <span id="chat-other-player-typing-ellipse-3" className="chat-other-player-typing-ellipse">.</span>
@@ -225,12 +225,17 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
     const [snackbarMsg, setSnackbarMsg] = useState('');
     const [hasPlayerJoinedFirstTime, setHasPlayerJoinedFirstTime] = useState(false);
 
+    const [isScreenNameDialogOpen, setIsScreenNameDialogOpen] = useState(true);
+    const [currScreenNameInDialog, setCurrScreenNameInDialog] = useState("");
+
     const [displayChat, setDisplayChat] = useState(false);
     const [currentChatMessage, setCurrentChatMessage] = useState("");
     const [isChatNotificationVisible, setIsChatNotificationVisible] = useState(false);
     const [chatNotificationCount, setChatNotificationCount] = useState(0);
 
     const initializeGame = () => {
+        setIsScreenNameDialogOpen(false);
+
         const pathArr = window.location.pathname.split('/');
         const urlSessionID = pathArr[pathArr.length - 1];
         let session_id = game._id;
@@ -239,7 +244,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
             session_id = urlSessionID;
         }
 
-        if (!game.hasQuitGame) initializeData(session_id, game.assignedPlayer);
+        if (!game.hasQuitGame) initializeData(session_id, game.assignedPlayer, (currScreenNameInDialog.toString().length > 0) ? currScreenNameInDialog : "Player");
     };
 
     const updateGameData = data => {
@@ -276,7 +281,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
               setHasPlayerJoinedFirstTime(game.hasP2Joined);
           }
           else {
-              setSnackbarMsg(`Player ${hasPlayerJoined} has joined!`);
+              setSnackbarMsg(`${(hasPlayerJoined === 1) ? game.p1Name : game.p2Name} has joined!`);
               setHasPlayerJoinedFirstTime(hasPlayerJoined);
           }
 
@@ -353,8 +358,15 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
         setDisplayChat(!displayChat);
     }
 
-    useEffect(() => {
+    const handleScreenNameDialogSubmit = (e) => {
+        e.preventDefault();
         initializeGame();
+    }
+
+    useEffect(() => {
+        if (game._id) {
+            initializeGame();
+        }
         // eslint-disable-next-line
     }, []);
 
@@ -408,8 +420,8 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
     if (game.winningPlayer || game.isDraw) bottomNavData.navActions.unshift(resetGameAction);
     if (isAdmin) bottomNavData.navActions.unshift(adminDashboardAction);
 
-    const playerTurnMessage = `You are ${(game.assignedPlayer === 1) ? 'X' : 'O'}! It is ${(game.currPlayerTurn === game.assignedPlayer) ? 'your' : (game.currPlayerTurn === 1) ? 'X\'s' : 'O\'s'} turn!`;
-    const winnerMessage =  (game.winningPlayer === 1) ? 'X Wins!' : 'O Wins!';
+    const playerTurnMessage = `You are ${(game.assignedPlayer === 1) ? 'X' : 'O'}! It is ${(game.currPlayerTurn === game.assignedPlayer) ? 'your' : (game.currPlayerTurn === 1) ? `${game.p1Name}\'s` : `${game.p2Name}\'s`} turn!`;
+    const winnerMessage =  (game.winningPlayer === 1) ? `${game.p1Name} Wins!` : `${game.p2Name} Wins!`;
     const gameOverMessage = `${(game.isDraw) ? "Game Over! It's a draw!" : (game.winningPlayer === game.assignedPlayer) ? 'Congratulations! You Win!' : `gg! ${winnerMessage}`}`;
 
     return (
@@ -428,6 +440,8 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
             <Chat
                 session_id={game._id}
                 assignedPlayer={game.assignedPlayer}
+                p1Name={game.p1Name}
+                p2Name={game.p2Name}
                 chatMessages={game.chatMessages}
                 displayChat={displayChat}
                 currentChatMessage={currentChatMessage}
@@ -439,6 +453,36 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
             />
             {/*<span style={{ wordWrap: 'break-word', overflow: 'auto', flex: '5%' }}>{JSON.stringify(game)}</span>*/}
 
+            <Dialog open={isScreenNameDialogOpen} onClose={() => {}} maxWidth="lg" fullWidth aria-labelledby="form-dialog-title">
+                <DialogTitle id="form-dialog-title">Screen Name</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Please enter a screen name:
+                    </DialogContentText>
+                    <form onSubmit={handleScreenNameDialogSubmit}>
+                        <TextField
+                            autoFocus
+                            margin="dense"
+                            id="screen_name"
+                            label="Screen Name"
+                            type="text"
+                            onChange={(e) => setCurrScreenNameInDialog(e.target.value)}
+                            value={currScreenNameInDialog}
+                            autoComplete="off"
+                            required
+                            fullWidth
+                        />
+                    </form>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleScreenNameDialogSubmit} color="primary">
+                        Play!
+                    </Button>
+                    <Button onClick={() => window.location.href = '/'} color="primary">
+                        Quit
+                    </Button>
+                </DialogActions>
+            </Dialog>
             <ReactSnackbar Icon={<GameIcon />} Show={isSnackbarShowing}>
                 {snackbarMsg}
             </ReactSnackbar>
@@ -452,7 +496,7 @@ const mapStateToProps = ({ game, session: { userId, isAdmin } }) => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    initializeData: (session_id, hasAssignedPlayer) => dispatch(initializeData(session_id, hasAssignedPlayer)),
+    initializeData: (session_id, hasAssignedPlayer, playerName) => dispatch(initializeData(session_id, hasAssignedPlayer, playerName)),
     updateData: gameData => dispatch(updateData(gameData)),
     resetData: (session_id, hasP2Joined) => dispatch(resetData(session_id, hasP2Joined)),
     cleanUpData: () => dispatch(cleanUpData()),

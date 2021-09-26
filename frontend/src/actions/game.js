@@ -57,7 +57,10 @@ const handleReceivedGameData = async (receivedGameData, dispatch, action, should
             session_id: gameData._id
         };
 
-        if (shouldAssignPlayer) sessionData.assignedPlayer = gameData.assignedPlayer;
+        if (shouldAssignPlayer) {
+            sessionData.assignedPlayer = gameData.assignedPlayer;
+            sessionData.playerName = (gameData.assignedPlayer === 1) ? gameData.p1Name : gameData.p2Name;
+        }
 
         await apiUtil.persistGameSession(sessionData);
 
@@ -99,7 +102,7 @@ const initUpdateSocket = (session_id, assignedPlayer, dispatch) => apiUtil.initi
     chatData => handleReceivedChatData(chatData, dispatch)
 );
 
-export const initializeData = (session_id, assignedPlayer) => async dispatch => {
+export const initializeData = (session_id, assignedPlayer, playerName = "Player") => async dispatch => {
     try {
         if (assignedPlayer && session_id) {
             initUpdateSocket(session_id, assignedPlayer, dispatch);
@@ -110,6 +113,10 @@ export const initializeData = (session_id, assignedPlayer) => async dispatch => 
 
         if (session_id) { // Only if a second player is joining
             initData._id = session_id;
+            initData.p2Name = playerName + ' (O)';
+        }
+        else {
+            initData.p1Name = playerName + ' (X)';
         }
 
         apiUtil.initialize(initData, async data => {
@@ -192,6 +199,8 @@ const prepareGameDataForSending = (gameData) => {
     delete gameData.chatMessages;
     delete gameData.hasReceivedMessage;
     delete gameData.isOtherPlayerTyping;
+    delete gameData.p1Name;
+    delete gameData.p2Name;
 
     return gameData;
 }

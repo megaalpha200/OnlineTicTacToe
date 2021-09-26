@@ -21,6 +21,8 @@ export const _nullSession = {
     chatMessages: [],
     hasReceivedMessage: false,
     isOtherPlayerTyping: false,
+    p1Name: 'Player (X)',
+    p2Name: 'Player (O)',
 };
 
 const gameReducer =  (state = _nullSession, { type, gameData, chatData, assignedPlayerTyping }) => {
