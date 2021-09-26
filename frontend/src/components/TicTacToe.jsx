@@ -475,11 +475,11 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
                     </form>
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={handleScreenNameDialogSubmit} color="primary">
-                        Play!
-                    </Button>
                     <Button onClick={() => window.location.href = '/'} color="primary">
                         Quit
+                    </Button>
+                    <Button onClick={handleScreenNameDialogSubmit} color="primary">
+                        Play!
                     </Button>
                 </DialogActions>
             </Dialog>
