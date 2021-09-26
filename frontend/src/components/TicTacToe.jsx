@@ -459,7 +459,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
                     <DialogContentText>
                         Please enter a screen name:
                     </DialogContentText>
-                    <form onSubmit={handleScreenNameDialogSubmit}>
+                    <form onSubmit={handleScreenNameDialogSubmit} method="post">
                         <TextField
                             autoFocus
                             margin="dense"
@@ -472,16 +472,16 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
                             required
                             fullWidth
                         />
+                        <DialogActions>
+                            <Button onClick={() => window.location.href = '/'} color="primary">
+                                Quit
+                            </Button>
+                            <Button type="submit" color="primary">
+                                Play!
+                            </Button>
+                        </DialogActions>
                     </form>
                 </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => window.location.href = '/'} color="primary">
-                        Quit
-                    </Button>
-                    <Button onClick={handleScreenNameDialogSubmit} color="primary">
-                        Play!
-                    </Button>
-                </DialogActions>
             </Dialog>
             <ReactSnackbar Icon={<GameIcon />} Show={isSnackbarShowing}>
                 {snackbarMsg}
