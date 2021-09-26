@@ -420,7 +420,7 @@ const TicTacToe = ({ game, initializeData, updateData, resetData, cleanUpData, s
     if (game.winningPlayer || game.isDraw) bottomNavData.navActions.unshift(resetGameAction);
     if (isAdmin) bottomNavData.navActions.unshift(adminDashboardAction);
 
-    const playerTurnMessage = `You are ${(game.assignedPlayer === 1) ? 'X' : 'O'}! It is ${(game.currPlayerTurn === game.assignedPlayer) ? 'your' : (game.currPlayerTurn === 1) ? `${game.p1Name}\'s` : `${game.p2Name}\'s`} turn!`;
+    const playerTurnMessage = `You are ${(game.assignedPlayer === 1) ? 'X' : 'O'}! It is ${(game.currPlayerTurn === game.assignedPlayer) ? 'your' : (game.currPlayerTurn === 1) ? `${game.p1Name}'s` : `${game.p2Name}'s`} turn!`;
     const winnerMessage =  (game.winningPlayer === 1) ? `${game.p1Name} Wins!` : `${game.p2Name} Wins!`;
     const gameOverMessage = `${(game.isDraw) ? "Game Over! It's a draw!" : (game.winningPlayer === game.assignedPlayer) ? 'Congratulations! You Win!' : `gg! ${winnerMessage}`}`;
 
