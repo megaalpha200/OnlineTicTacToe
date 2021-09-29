@@ -27,7 +27,7 @@ article {
 }
 
 .game.reduced {
-    flex: 30%;
+    flex: 60%;
 }
 
 .game-board {
@@ -57,8 +57,8 @@ article {
 
 .game-square.reduced {
     font-size: 1.8em;
-    height: 2rem;
-    width: 2rem;
+    height: 6rem;
+    width: 6rem;
 }
 
 .game-square.draw {
@@ -79,7 +79,7 @@ article {
 }
 
 #chat-collapse.expanded {
-    flex: 60%;
+    flex: 30%;
     height: 100%;
 }
 
@@ -96,6 +96,7 @@ article {
 #chat {
     margin: 0;
     overflow: auto;
+    font-size: medium;
     flex: 85%;
 }
 
@@ -153,6 +154,7 @@ article {
 }
 
 #chat-sound-credits-container {
+    font-size: small;
     flex: 5%;
 }
 
@@ -178,11 +180,45 @@ article {
         height: 7rem;
         width: 7rem;
     }
+
+    #chat-collapse.expanded {
+        flex: 60%;
+    }
+
+    #chat-sound-credits-container {
+        flex: 5%;
+    }
 }
 
 @media screen and (max-width: 540px) {
+    .game.reduced {
+        flex: 30%;
+    }
+
     .game-square {
         height: 6rem;
         width: 6rem;
+    }
+
+    .game-square.reduced {
+        font-size: 1.8em;
+        height: 2rem;
+        width: 2rem;
+    }
+
+    #chat {
+        font-size: small;
+    }
+
+    #chat-collapse.expanded {
+        flex: 50%;
+    }
+
+    #chat-sound-credits-container {
+        font-size: smaller;
+    }
+
+    #chat-sound-credits-container {
+        flex: 15%;
     }
 }
