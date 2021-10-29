@@ -117,6 +117,7 @@ export const initializeData = (session_id, assignedPlayer, playerName = "Player"
         }
         else {
             initData.p1Name = playerName + ' (X)';
+            initData.p2Name = 'Player (O)';
         }
 
         apiUtil.initialize(initData, async data => {
