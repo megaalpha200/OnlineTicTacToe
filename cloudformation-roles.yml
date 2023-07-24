@@ -20,7 +20,7 @@ Resources:
         - arn:aws:iam::aws:policy/AWSCodeBuildDeveloperAccess
         - arn:aws:iam::aws:policy/AWSCodeDeployFullAccess
         - arn:aws:iam::aws:policy/AmazonSSMReadOnlyAccess
-        - arn:aws:iam::aws:policy/AWSCodePipelineFullAccess
+        - arn:aws:iam::aws:policy/AWSCodePipeline_FullAccess
         - arn:aws:iam::aws:policy/AWSCloudFormationFullAccess
       Policies:
         - PolicyName: CodeBuildSecretsManagerPolicy

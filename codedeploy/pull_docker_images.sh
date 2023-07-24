@@ -16,7 +16,7 @@ esac
 
 /usr/local/bin/docker-compose pull
 docker stack rm app-stack
-sleep 5
+sleep 10
 sudo chmod +x ./init-letsencrypt.sh
 cat .led | sudo ./init-letsencrypt.sh
 sleep 5

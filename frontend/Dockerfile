@@ -2,6 +2,7 @@ FROM node AS builder
 WORKDIR /app
 COPY . /app
 RUN yarn install
+ENV NODE_OPTIONS=--openssl-legacy-provider
 RUN yarn build
 
 FROM nginx:alpine

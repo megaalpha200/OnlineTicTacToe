@@ -3,12 +3,12 @@ Parameters:
   InstanceSSHKeyName:
     Description: Instance Key Pair Name
     Type: String
-    Default: hexipitemplate-key-new
+    Default: onlinetttjaa
 
   InstanceClientTag:
     Description: Instance Client Tag
     Type: String
-    Default: HexiPi
+    Default: JAAProductions
 
   DockerAuth:
     Description: Docker Auth
@@ -44,7 +44,7 @@ Resources:
     DeletionPolicy: Delete
     Properties:
       AvailabilityZone: us-east-1a
-      ImageId : ami-04d29b6f966df1537
+      ImageId : ami-053b0d53c279acc90
       InstanceType : t2.micro
       KeyName: !Ref InstanceSSHKeyName
       IamInstanceProfile: !Ref CodeDeployEC2Profile
@@ -69,11 +69,23 @@ Resources:
 
           #Check for Package Updates
           echo "### Checking for Package Updates..."
-          yum update -y && yum upgrade -y && yum clean packages
+          apt-get update -y && apt-get upgrade -y
           echo
 
           echo "### Installing Docker, Git, Python 3, PIP, htop, Ruby, and Wget..."
-          yum install docker git python3 python3-pip htop ruby wget -y
+          apt-get install git python3 python3-pip htop ruby wget -y
+
+          apt-get install ca-certificates curl gnupg -y
+          install -m 0755 -d /etc/apt/keyrings
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg | gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+          chmod a+r /etc/apt/keyrings/docker.gpg
+          echo \
+          "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+          "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
+          tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+          apt-get update -y
+          apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
           echo
 
           echo "### Installing CodeDeploy Agent..."
@@ -89,6 +101,7 @@ Resources:
           echo
 
           echo "### Installing Docker Compose..."
+          # pip3 install urllib3==1.26.6
           pip3 install docker-compose
           echo
 
@@ -110,7 +123,7 @@ Resources:
 
           if [ -x "$(command -v docker-compose)" ]; then
               groupadd docker
-              usermod -aG docker ec2-user
+              usermod -aG docker ubuntu
               #ADD CONFIG
               systemctl start docker
               systemctl enable docker
@@ -124,13 +137,13 @@ Resources:
 
           if [ $success == 1 ]; then
               echo "### Creating Project Folder..."
-              mkdir /home/ec2-user/app
-              chown ec2-user:ec2-user -R /home/ec2-user/app
+              mkdir /home/ubuntu/app
+              chown ubuntu:ubuntu -R /home/ubuntu/app
               echo 
               echo "### Setting up Docker..."
-              mkdir /home/ec2-user/.docker
-              echo "{ \"auths\": { \"https://index.docker.io/v1/\": { \"auth\": \"$dockerAuth\" } } }" > /home/ec2-user/.docker/config.json
-              chown ec2-user:ec2-user -R /home/ec2-user/.docker
+              mkdir /home/ubuntu/.docker
+              echo "{ \"auths\": { \"https://index.docker.io/v1/\": { \"auth\": \"$dockerAuth\" } } }" > /home/ubuntu/.docker/config.json
+              chown ubuntu:ubuntu -R /home/ubuntu/.docker
               echo
               echo
               echo "Yay! Everything was successfully initialized!"
@@ -140,6 +153,13 @@ Resources:
           fi
       SecurityGroups:
         - !Ref ServerSecurityGroup
+      BlockDeviceMappings:
+      - DeviceName: "/dev/sda1"
+        Ebs:
+          DeleteOnTermination: "true"
+          VolumeType: "gp3"
+          VolumeSize: "16"
+          Encrypted: false
 
   TemplateEIP:
     Type: AWS::EC2::EIP
@@ -163,9 +183,9 @@ Resources:
         ToPort: 443
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
-        Description: Backend
-        FromPort: 8524
-        ToPort: 8524
+        Description: TTT Backend
+        FromPort: 8525
+        ToPort: 8525
         CidrIp: 0.0.0.0/0
       - IpProtocol: tcp
         Description: SSH for Admin
@@ -346,17 +366,17 @@ Resources:
               OutputArtifacts: 
                 - 
                   Name: SourceArtifacts
-              Configuration:
-                Owner: dummy
-                Repo: dummy
-                Branch: master
-                OAuthToken: dummy
-
               # Configuration:
-              #   Owner: "{{resolve:secretsmanager:GHAuth:SecretString:SourceRepoOwner}}"
-              #   Repo: "{{resolve:secretsmanager:GHAuth:SecretString:SourceRepoName}}"
+              #   Owner: dummy
+              #   Repo: dummy
               #   Branch: master
-              #   OAuthToken: "{{resolve:secretsmanager:GHAuth:SecretString:GitHubPersonalAccessToken}}"
+              #   OAuthToken: dummy
+
+              Configuration:
+                Owner: "{{resolve:secretsmanager:GHAuth:SecretString:SourceRepoOwner}}"
+                Repo: "{{resolve:secretsmanager:GHAuth:SecretString:SourceRepoName}}"
+                Branch: master
+                OAuthToken: "{{resolve:secretsmanager:GHAuth:SecretString:GitHubPersonalAccessToken}}"
         -
           Name: Build
           Actions: 
@@ -384,6 +404,7 @@ Resources:
                   Name: BuildArtifacts
               Configuration:
                 ProjectName: !Ref CodeBuild
+                EnvironmentVariables: '[{"name": "SKIP_BUILD", "value": "false"}, {"name": "LETS_ENCRYPT_DECISION", "value": "y"}]'
         -
           Name: Deploy
           Actions:

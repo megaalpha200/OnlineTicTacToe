@@ -5,7 +5,7 @@ if ! [ -x "$(command -v /usr/local/bin/docker-compose)" ]; then
   exit 1
 fi
 
-domains=(tictactoeonline.tk www.tictactoeonline.tk)
+domains=(ttt.jaaproductions.com)
 rsa_key_size=4096
 data_path="./certbot"
 email="" # Adding a valid address is strongly recommended
